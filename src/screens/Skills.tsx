@@ -1,0 +1,16 @@
+import type { Screen } from "../App";
+
+type Props = { setScreen: (s: Screen) => void };
+
+const Skills = ({ setScreen }: Props) => (
+  <div style={{ height: "100%", display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 clamp(2rem, 8vw, 6rem)" }}>
+    <button onClick={() => setScreen("menu")} style={{ background: "none", border: "none", cursor: "pointer", color: "#888", fontFamily: "var(--font-mono)", fontSize: "0.7rem", letterSpacing: "0.2em", marginBottom: "2rem", textAlign: "left", width: "fit-content" }}>
+      ← BACK
+    </button>
+    <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.65rem", color: "var(--red)", letterSpacing: "0.3em", marginBottom: "0.5rem" }}>02 // STATS</div>
+    <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(2.5rem, 6vw, 5rem)", color: "var(--white)", letterSpacing: "0.05em" }}>STATS</h2>
+    <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.7rem", color: "#555", letterSpacing: "0.15em", marginTop: "1rem" }}>CONTENT COMING SOON</p>
+  </div>
+);
+
+export default Skills;
