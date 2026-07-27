@@ -77,17 +77,17 @@ export function createPlanetSphere(): PlanetSphereHandle {
 
   group.add(smokeSprite);
 
-  let planetSpinSpeed = 0.001;
+  let planetSpinSpeed = 0.0018;
 
   // Update
   const update = (hoveredIndex: number | null, time: number) => {
     const isHovered = hoveredIndex !== null;
 
     coreMesh.rotation.y += planetSpinSpeed;
-    coreMesh.rotation.x = 0.18 + Math.sin(time * 0.07) * 0.04;
+    coreMesh.rotation.x = 0.18 + Math.sin(time * 0.07) * 0.25;
 
     const target = isHovered ? 0.4 : 0.3;
-    const targetSpin = isUIHovered ? 0.06 : 0.001;
+    const targetSpin = isUIHovered ? 0.04 : 0.0018;
     planetSpinSpeed = THREE.MathUtils.lerp(
       planetSpinSpeed,
       targetSpin,

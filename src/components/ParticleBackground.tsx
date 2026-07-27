@@ -6,6 +6,7 @@ import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import { createLargeGlowTexture } from "./GlowTexture";
 import { isUIHovered } from "../utils/SceneIntegration";
+import { createSpaceAtmosphere } from "./SpaceAtmosphere";
 
 type Props = {
   hoveredIndex: number | null;
@@ -66,6 +67,9 @@ const ParticleBackground = ({ hoveredIndex }: Props) => {
     window.addEventListener("mousemove", handleMouseMove);
 
     const scene = new THREE.Scene();
+
+    const spaceAtmosphere = createSpaceAtmosphere();
+    scene.add(spaceAtmosphere.group);
 
     scene.add(new THREE.AmbientLight(0x2a0010, 0.35));
 
@@ -289,6 +293,7 @@ const ParticleBackground = ({ hoveredIndex }: Props) => {
       depthPoints.rotation.y += rotationSpeed * 0.6;
 
       planet.update(hoveredRef.current, time);
+      spaceAtmosphere.update(clock.getElapsedTime());
 
       const bob = Math.sin(time * 0.3) * 0.07;
       const zPull = isMoving ? 2.35 : baseZ;
@@ -331,6 +336,7 @@ const ParticleBackground = ({ hoveredIndex }: Props) => {
       glowTexture.dispose();
       largeGlowTexture.dispose();
       composer.dispose();
+      spaceAtmosphere.dispose();
 
       if (mount && renderer.domElement.parentElement === mount) {
         mount.removeChild(renderer.domElement);
