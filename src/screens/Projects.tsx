@@ -3,7 +3,17 @@ import type { Screen } from "../App";
 type Props = { setScreen: (s: Screen) => void };
 
 const Projects = ({ setScreen }: Props) => (
-  <div style={{ height: "100%", display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 clamp(2rem, 8vw, 6rem)" }}>
+  <div 
+    style={{
+      position: "relative",
+      zIndex: 50,
+      height: "100%",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      padding: "0 clamp(2rem, 8vw, 6rem)",
+    }}
+  >
     <button onClick={() => setScreen("menu")} style={{ background: "none", border: "none", cursor: "pointer", color: "#888", fontFamily: "var(--font-mono)", fontSize: "0.7rem", letterSpacing: "0.2em", marginBottom: "2rem", textAlign: "left", width: "fit-content" }}>
       ← BACK
     </button>

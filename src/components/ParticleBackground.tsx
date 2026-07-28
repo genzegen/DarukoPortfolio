@@ -7,9 +7,11 @@ import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPa
 import { createLargeGlowTexture } from "./GlowTexture";
 import { isUIHovered } from "../utils/SceneIntegration";
 import { createSpaceAtmosphere } from "./SpaceAtmosphere";
+import { CAMERA_PRESETS } from "../utils/CameraPresets";
 
 type Props = {
   hoveredIndex: number | null;
+  activeScreen: string;
 };
 
 function createGlowTexture() {
@@ -42,19 +44,28 @@ function createGlowTexture() {
   return new THREE.CanvasTexture(canvas);
 }
 
-
 function seededRand(seed: number): number {
   const x = Math.sin(seed + 1) * 43758.5453123;
   return x - Math.floor(x);
 }
 
-const ParticleBackground = ({ hoveredIndex }: Props) => {
+const ParticleBackground = ({
+  hoveredIndex,
+  activeScreen
+}: Props) => {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const hoveredRef = useRef<number | null>(hoveredIndex);
+  const currentPresetRef = useRef<keyof typeof CAMERA_PRESETS>("home");
+  const lookAtTarget = useRef(new THREE.Vector3(0, 0.1, 0));
 
   useEffect(() => {
     hoveredRef.current = hoveredIndex;
   }, [hoveredIndex]);
+
+  useEffect(() => {
+    currentPresetRef.current =
+      activeScreen as keyof typeof CAMERA_PRESETS;
+  }, [activeScreen]);
 
   useEffect(() => {
     if (!mountRef.current) return;
@@ -92,11 +103,16 @@ const ParticleBackground = ({ hoveredIndex }: Props) => {
       1000
     );
 
-    const baseX = 0.3;
-    const baseY = 0.25;
-    const baseZ = 2.8;
-    camera.position.set(baseX, baseY, baseZ);
-    camera.lookAt(0, 0.1, 0);
+    // Initial camera placement — snap straight to the home preset.
+    // (No floatX/floatY here: those only exist per-frame inside animate().)
+    const cameraTarget = {
+      position: CAMERA_PRESETS.home.position.clone(),
+      lookAt: CAMERA_PRESETS.home.lookAt.clone(),
+    };
+
+    camera.position.copy(cameraTarget.position);
+    camera.lookAt(cameraTarget.lookAt);
+    lookAtTarget.current.copy(cameraTarget.lookAt);
 
     const renderer = new THREE.WebGLRenderer({
       alpha: true,
@@ -237,15 +253,6 @@ const ParticleBackground = ({ hoveredIndex }: Props) => {
       animationId = requestAnimationFrame(animate);
       const time = clock.getElapsedTime();
 
-      const mouse = { x: 0, y: 0 };
-      const targetCameraPos = { x: 0, y: 0 }
-
-      targetCameraPos.x = mouse.x * 5;
-      targetCameraPos.y = mouse.y * 5;
-
-      camera.position.x += (targetCameraPos.x - camera.position.x) * 0.05
-      camera.position.y += (targetCameraPos.y - camera.position.y) * 0.05
-
       const pos = geometry.attributes.position as THREE.BufferAttribute;
       for (let i = 0; i < COUNT; i++) {
         angles[i] += speeds[i];
@@ -280,13 +287,11 @@ const ParticleBackground = ({ hoveredIndex }: Props) => {
       const breath = (Math.sin(time * 0.08) + 1) / 2;
       const breathe = 0.9 + Math.pow(breath, 2) * 0.25;
       const isMoving = performance.now() - lastMoveTime < 1000;
+      const allowMouseMovement = currentPresetRef.current === "home";
 
       const interacting = isMoving || isUIHovered;
 
-      const targetRotationSpeed = interacting
-        ? 0.008
-        : 0.0008;
-
+      const targetRotationSpeed = interacting ? 0.008 : 0.0008;
 
       rotationSpeed += (targetRotationSpeed * breathe - rotationSpeed) * 0.02;
       points.rotation.y += rotationSpeed;
@@ -295,16 +300,31 @@ const ParticleBackground = ({ hoveredIndex }: Props) => {
       planet.update(hoveredRef.current, time);
       spaceAtmosphere.update(clock.getElapsedTime());
 
-      const bob = Math.sin(time * 0.3) * 0.07;
-      const zPull = isMoving ? 2.35 : baseZ;
-      const currentZ = camera.position.z;
+      // --- Camera transition ---
+      const preset = CAMERA_PRESETS[currentPresetRef.current];
 
-      camera.position.set(
-        baseX,
-        baseY + bob,
-        currentZ + (zPull - currentZ) * 0.03
+      const targetPosition = preset.position.clone();
+
+      const bob = Math.sin(time * 0.3) * 0.02;
+      targetPosition.y += bob;
+
+      if (allowMouseMovement && isMoving) {
+        targetPosition.x += 0.2;
+        targetPosition.y += 0.1;
+        targetPosition.z -= 0.5;
+      }
+
+      const cameraLerp = allowMouseMovement && isMoving ? 0.03 : 0.01;
+      camera.position.lerp(targetPosition, cameraLerp);
+
+      lookAtTarget.current.lerp(
+        preset.lookAt,
+        0.03
       );
-      camera.lookAt(0, 0.1, 0);
+
+      camera.lookAt(
+        lookAtTarget.current
+      );
 
       composer.render();
     };
@@ -320,7 +340,7 @@ const ParticleBackground = ({ hoveredIndex }: Props) => {
     };
     window.addEventListener("resize", handleResize);
 
-    if(!mountRef.current) return;
+    if (!mountRef.current) return;
     const mount = mountRef.current;
 
     return () => {
