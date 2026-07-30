@@ -54,7 +54,7 @@ export function createPlanetSphere(): PlanetSphereHandle {
     roughness: 0.3,
     metalness: 0.05,
     emissive: new THREE.Color(0x7a1048),
-    emissiveIntensity: 0.7,
+    emissiveIntensity: 0.15,
   });
   
   const coreMesh = new THREE.Mesh(sphereGeo, coreMat);

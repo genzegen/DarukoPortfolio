@@ -7,7 +7,8 @@ const Contact = ({ setScreen }: Props) => (
     style={{
       position: "relative",
       zIndex: 50,
-      height: "100%",
+      width: "100%",
+      minHeight: "100vh",
       display: "flex",
       flexDirection: "column",
       justifyContent: "center",

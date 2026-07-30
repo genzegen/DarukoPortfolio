@@ -19,10 +19,9 @@ const MainMenu = ({ setScreen, hoveredIndex, setHoveredIndex }: Props) => {
   return (
     <div
       style={{
-        position: "fixed",
-        inset: 0,
-        width: "100vw",
-        height: "100vh",
+        position: "relative",
+        width: "100%",
+        minHeight: "100vh",
         overflow: "hidden",
         display: "flex",
         alignItems: "center",

@@ -90,7 +90,6 @@ function randomOnSphere(radius: number): THREE.Vector3 {
     return new THREE.Vector3(x, y, z);
 }
 
-
 export function createSpaceAtmosphere(): SpaceAtmosphereHandle {
     const group = new THREE.Group();
     group.name = 'spaceAtmosphere';
@@ -125,7 +124,7 @@ export function createSpaceAtmosphere(): SpaceAtmosphereHandle {
         transparent: true,
         depthWrite: false,
         blending: THREE.AdditiveBlending,
-        opacity: randRange(0.18, 0.4),
+        opacity: randRange(0.035, 0.09),
         });
         disposables.push(material);
 
@@ -156,6 +155,159 @@ export function createSpaceAtmosphere(): SpaceAtmosphereHandle {
     }
 
     group.add(nebulaGroup);
+
+    // -------------------- distant energy source --------------------
+    const lightSourceGroup = new THREE.Group();
+
+    lightSourceGroup.name =
+    "distantEnergySource";
+
+    // Positioned on the same general side as
+    // the pink glow visible on the planet.
+    lightSourceGroup.position.set(
+    -4.5,
+    2.6,
+    3.5
+    );
+
+    // Large outer glow
+    const outerGlowTexture =
+    makeGlowTexture(
+        "#ff2f6d",
+        512
+    );
+
+    disposables.push(
+    outerGlowTexture
+    );
+
+    const outerGlowMaterial =
+    new THREE.SpriteMaterial({
+        map: outerGlowTexture,
+        color: 0xff2f6d,
+        transparent: true,
+        opacity: 0.5,
+        depthWrite: false,
+        depthTest: false,
+        blending:
+        THREE.AdditiveBlending,
+    });
+
+    disposables.push(
+    outerGlowMaterial
+    );
+
+    const outerGlow =
+    new THREE.Sprite(
+        outerGlowMaterial
+    );
+
+    outerGlow.name =
+    "energyOuterGlow";
+
+    outerGlow.scale.set(
+    4.2,
+    3.2,
+    1
+    );
+
+    lightSourceGroup.add(
+    outerGlow
+    );
+
+    // Stronger middle glow
+    const middleGlowTexture =
+    makeGlowTexture(
+        "#ff6b9a",
+        256
+    );
+
+    disposables.push(
+    middleGlowTexture
+    );
+
+    const middleGlowMaterial =
+    new THREE.SpriteMaterial({
+        map: middleGlowTexture,
+        color: 0xff5c8a,
+        transparent: true,
+        opacity: 1,
+        depthWrite: false,
+        depthTest: false,
+        blending:
+        THREE.AdditiveBlending,
+    });
+
+    disposables.push(
+    middleGlowMaterial
+    );
+
+    const middleGlow =
+    new THREE.Sprite(
+        middleGlowMaterial
+    );
+
+    middleGlow.name =
+    "energyMiddleGlow";
+
+    middleGlow.scale.set(
+    3.5,
+    3.5,
+    1
+    );
+
+    lightSourceGroup.add(
+    middleGlow
+    );
+
+    // Bright central core
+    const coreGlowTexture =
+    makeGlowTexture(
+        "#ffffff",
+        256
+    );
+
+    disposables.push(
+    coreGlowTexture
+    );
+
+    const coreGlowMaterial =
+    new THREE.SpriteMaterial({
+        map: coreGlowTexture,
+        color: 0xffffff,
+        transparent: true,
+        opacity: 1,
+        depthWrite: false,
+        depthTest: false,
+        blending:
+        THREE.AdditiveBlending,
+    });
+
+    disposables.push(
+    coreGlowMaterial
+    );
+
+    const coreGlow =
+    new THREE.Sprite(
+        coreGlowMaterial
+    );
+
+    coreGlow.name =
+    "energyCore";
+
+    coreGlow.scale.set(
+    1.2,
+    1.2,
+    1
+    );
+
+    lightSourceGroup.add(
+    coreGlow
+    );
+
+    group.add(
+    lightSourceGroup
+    );
 
     // -------------------- starfield layer --------------------
     const starTexture = makeStarTexture();
@@ -225,7 +377,7 @@ export function createSpaceAtmosphere(): SpaceAtmosphereHandle {
         // gentle opacity pulse, like breathing gas clouds
         const pulse =
             0.5 + 0.5 * Math.sin(time * layer.pulseSpeed + layer.pulsePhase);
-        material.opacity = layer.baseOpacity * (0.7 + 0.3 * pulse);
+        material.opacity = layer.baseOpacity * (0.8 + 0.2 * pulse);
 
         // slow sprite-plane spin for a bit of internal motion
         material.rotation += layer.spinSpeed * 0.01;
@@ -237,6 +389,69 @@ export function createSpaceAtmosphere(): SpaceAtmosphereHandle {
             .multiplyScalar(Math.sin(driftAngle) * 12);
         layer.sprite.position.copy(layer.basePosition).add(offset);
         }
+
+        const energyPulse =
+        1 +
+        Math.sin(
+            time * 0.8
+        ) * 0.08;
+
+        const secondaryPulse =
+        1 +
+        Math.sin(
+            time * 1.15 + 1
+        ) * 0.06;
+
+        // Large atmospheric halo
+        outerGlow.scale.set(
+        6.2 * energyPulse,
+        4.2 * energyPulse,
+        1
+        );
+
+        outerGlowMaterial.opacity =
+        0.42 +
+        Math.sin(
+            time * 0.65
+        ) * 0.06;
+
+        // Brighter inner energy
+        middleGlow.scale.set(
+        3.5 * secondaryPulse,
+        3.5 * secondaryPulse,
+        1
+        );
+
+        middleGlowMaterial.opacity =
+        0.4 +
+        Math.sin(
+            time * 1.1
+        ) * 0.1;
+
+        // Small bright center
+        coreGlow.scale.set(
+        1.2 *
+            (
+            1 +
+            Math.sin(
+                time * 1.5
+            ) * 0.05
+            ),
+        1.2 *
+            (
+            1 +
+            Math.sin(
+                time * 1.5
+            ) * 0.05
+            ),
+        1
+        );
+
+        coreGlowMaterial.opacity =
+        0.95 +
+        Math.sin(
+            time * 1.4
+        ) * 0.05;
     }
 
     function dispose() {

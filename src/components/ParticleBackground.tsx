@@ -122,7 +122,7 @@ const ParticleBackground = ({
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    renderer.domElement.style.position = "absolute";
+    renderer.domElement.style.position = "fixed";
     renderer.domElement.style.top = "0";
     renderer.domElement.style.left = "0";
     renderer.domElement.style.width = "100%";
@@ -391,7 +391,7 @@ const ParticleBackground = ({
   return (
     <div
       ref={mountRef}
-      className="absolute inset-0 w-full h-full overflow-hidden"
+      className="fixed inset-0 w-full h-full overflow-hidden"
     />
   );
 };
