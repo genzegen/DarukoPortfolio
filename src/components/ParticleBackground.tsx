@@ -170,6 +170,7 @@ const ParticleBackground = ({
     const noiseAmpY = new Float32Array(COUNT);
 
     const RING_RADIUS = 2.5;
+    const MIN_ORBIT_DIST = RING_RADIUS + 0.5;
 
     for (let i = 0; i < COUNT; i++) {
       const angle = Math.random() * Math.PI * 2;
@@ -316,6 +317,12 @@ const ParticleBackground = ({
 
       const cameraLerp = allowMouseMovement && isMoving ? 0.03 : 0.01;
       camera.position.lerp(targetPosition, cameraLerp);
+
+      const distFromOrigin = camera.position.length();
+      if (distFromOrigin < MIN_ORBIT_DIST) {
+        const corrected = camera.position.clone().setLength(MIN_ORBIT_DIST);
+        camera.position.lerp(corrected, 0.15); // gentle push-out, not instant
+      }
 
       const nextFov = THREE.MathUtils.lerp(
         camera.fov,
