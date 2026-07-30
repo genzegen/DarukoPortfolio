@@ -317,6 +317,17 @@ const ParticleBackground = ({
       const cameraLerp = allowMouseMovement && isMoving ? 0.03 : 0.01;
       camera.position.lerp(targetPosition, cameraLerp);
 
+      const nextFov = THREE.MathUtils.lerp(
+        camera.fov,
+        preset.fov,
+        0.03
+      );
+
+      if (Math.abs(camera.fov - nextFov) > 0.001) {
+        camera.fov = nextFov;
+        camera.updateProjectionMatrix();
+      }
+
       lookAtTarget.current.lerp(
         preset.lookAt,
         0.03
@@ -324,6 +335,12 @@ const ParticleBackground = ({
 
       camera.lookAt(
         lookAtTarget.current
+      );
+
+      camera.rotation.z = THREE.MathUtils.lerp(
+        camera.rotation.z,
+        preset.roll,
+        0.03
       );
 
       composer.render();

@@ -87,7 +87,7 @@ export function createPlanetSphere(): PlanetSphereHandle {
     coreMesh.rotation.x = 0.18 + Math.sin(time * 0.07) * 0.25;
 
     const target = isHovered ? 0.4 : 0.3;
-    const targetSpin = isUIHovered ? 0.06 : 0.0018;
+    const targetSpin = isUIHovered ? 0.038 : 0.0018;
     planetSpinSpeed = THREE.MathUtils.lerp(
       planetSpinSpeed,
       targetSpin,
