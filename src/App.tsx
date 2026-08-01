@@ -47,15 +47,31 @@ function App() {
     setUIHovered(false);
     setHoveredIndex(null);
 
+    const targetIndex =
+      sections.indexOf(screen);
+
+    if (targetIndex !== -1) {
+      currentSectionIndexRef.current = targetIndex;
+    }
+
     const targetSection =
       sectionRefs.current[screen];
 
-    if (!targetSection) return;
+    if (!targetSection) {
+      isScrollingRef.current = false;
+      return;
+    }
+
+    isScrollingRef.current = true;
 
     targetSection.scrollIntoView({
       behavior: "smooth",
       block: "start",
     });
+
+    window.setTimeout(() => {
+      isScrollingRef.current = false;
+    }, 600);
   };
 
   useEffect(() => {
@@ -86,6 +102,10 @@ function App() {
           screenName === "contact"
         ) {
           setActiveScreen(screenName);
+          const idx = sections.indexOf(screenName);
+          if (idx !== -1) {
+            currentSectionIndexRef.current = idx;
+          }
         }
       },
       {
