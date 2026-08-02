@@ -57,6 +57,7 @@ const ParticleBackground = ({
   const hoveredRef = useRef<number | null>(hoveredIndex);
   const currentPresetRef = useRef<keyof typeof CAMERA_PRESETS>("home");
   const lookAtTarget = useRef(new THREE.Vector3(0, 0.1, 0));
+  const currentRoll = useRef(0);
 
   useEffect(() => {
     hoveredRef.current = hoveredIndex;
@@ -340,15 +341,17 @@ const ParticleBackground = ({
         0.03
       );
 
-      camera.lookAt(
-        lookAtTarget.current
-      );
-
-      camera.rotation.z = THREE.MathUtils.lerp(
-        camera.rotation.z,
+      currentRoll.current = THREE.MathUtils.lerp(
+        currentRoll.current,
         preset.roll,
         0.03
-      );
+      );  
+
+      const forward = lookAtTarget.current.clone().sub(camera.position).normalize();
+      const rolledUp = new THREE.Vector3(0, 1, 0).applyAxisAngle(forward, currentRoll.current);
+
+      camera.up.copy(rolledUp);
+      camera.lookAt(lookAtTarget.current);
 
       composer.render();
     };

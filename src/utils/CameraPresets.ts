@@ -1,44 +1,40 @@
 import * as THREE from "three";
 
+const CAMERA_RADIUS = 2.8;     // distance from the planet's center
+const CAMERA_HEIGHT = 0.35;    // constant camera altitude
+const LOOKAT_RADIUS = 0.5;     // how far the look-at point drifts past center
+const LOOKAT_HEIGHT = 0.12;    // look-at altitude
+
+const ANGLE_STEP = -72; // degrees, negative = clockwise when viewed from above
+
+interface CameraPreset {
+    position: THREE.Vector3;
+    lookAt: THREE.Vector3;
+    fov: number;
+    roll: number;
+}
+
+function presetAtAngle(angleDeg: number, fov: number, roll: number): CameraPreset {
+    const rad = THREE.MathUtils.degToRad(angleDeg);
+
+    const x = CAMERA_RADIUS * Math.sin(rad);
+    const z = CAMERA_RADIUS * Math.cos(rad);
+
+    const lookX = -LOOKAT_RADIUS * Math.sin(rad);
+    const lookZ = -LOOKAT_RADIUS * Math.cos(rad);
+
+    return {
+        position: new THREE.Vector3(x, CAMERA_HEIGHT, z),
+        lookAt: new THREE.Vector3(lookX, LOOKAT_HEIGHT, lookZ),
+        fov,
+        roll,
+    };
+}
+
 export const CAMERA_PRESETS = {
-    home: {
-        // Front view — starting point
-        position: new THREE.Vector3(0.3, 0.25, 2.8),
-        lookAt: new THREE.Vector3(0, 0.1, 0),
-        fov: 72,
-        roll: 0,
-    },
-
-    projects: {
-        // First clockwise step — front-right
-        position: new THREE.Vector3(2.75, 0.55, 0.95),
-        lookAt: new THREE.Vector3(-0.55, 0.1, 0.25),
-        fov: 65,
-        roll: -0.04,
-    },
-
-    skills: {
-        // Second clockwise step — back-right
-        position: new THREE.Vector3(1.65, 0.35, -2.25),
-        lookAt: new THREE.Vector3(-0.65, 0.1, -0.2),
-        fov: 63,
-        roll: -0.055,
-    },
-
-    about: {
-        // Third clockwise step — back-left
-        position: new THREE.Vector3(0.05, 0.75, -2.25),
-        lookAt: new THREE.Vector3(0.3, 0.2, -0.25),
-        fov: 59,
-        roll: -0.02,
-    },
-
-    contact: {
-        // Fourth clockwise step — front-left
-        // Returning to Home completes the final equal step.
-        position: new THREE.Vector3(-0.75, 0.05, 0.95),
-        lookAt: new THREE.Vector3(0.55, 0.05, 0.2),
-        fov: 64,
-        roll: -0.025,
-    },
+    home: presetAtAngle(0 * ANGLE_STEP, 72, 0),
+    projects: presetAtAngle(1 * ANGLE_STEP, 65, -0.04),
+    skills: presetAtAngle(2 * ANGLE_STEP, 63, -0.055),
+    about: presetAtAngle(3 * ANGLE_STEP, 59, -0.02),
+    contact: presetAtAngle(4 * ANGLE_STEP, 64, -0.025),
 } as const;
