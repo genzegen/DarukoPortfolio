@@ -7,11 +7,13 @@ import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPa
 import { createLargeGlowTexture } from "./GlowTexture";
 import { isUIHovered } from "../utils/SceneIntegration";
 import { createSpaceAtmosphere } from "./SpaceAtmosphere";
-import { CAMERA_PRESETS } from "../utils/CameraPresets";
+import { CAMERA_PRESETS, DETAIL_PRESETS } from "../utils/CameraPresets";
+import type { SectionName, ViewMode } from "../utils/CameraPresets";
 
 type Props = {
   hoveredIndex: number | null;
   activeScreen: string;
+  viewMode: "brief" | "detail";
 };
 
 function createGlowTexture() {
@@ -51,11 +53,13 @@ function seededRand(seed: number): number {
 
 const ParticleBackground = ({
   hoveredIndex,
-  activeScreen
+  activeScreen,
+  viewMode,
 }: Props) => {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const hoveredRef = useRef<number | null>(hoveredIndex);
-  const currentPresetRef = useRef<keyof typeof CAMERA_PRESETS>("home");
+  const currentPresetRef = useRef<SectionName>("home");
+  const viewModeRef = useRef<ViewMode>("brief");
   const lookAtTarget = useRef(new THREE.Vector3(0, 0.1, 0));
   const currentRoll = useRef(0);
 
@@ -67,6 +71,10 @@ const ParticleBackground = ({
     currentPresetRef.current =
       activeScreen as keyof typeof CAMERA_PRESETS;
   }, [activeScreen]);
+
+  useEffect(() => {
+    viewModeRef.current = viewMode;
+  }, [viewMode]);
 
   useEffect(() => {
     if (!mountRef.current) return;
@@ -303,7 +311,9 @@ const ParticleBackground = ({
       spaceAtmosphere.update(clock.getElapsedTime());
 
       // --- Camera transition ---
-      const preset = CAMERA_PRESETS[currentPresetRef.current];
+      const preset = viewModeRef.current === "detail"
+        ? DETAIL_PRESETS[currentPresetRef.current]
+        : CAMERA_PRESETS[currentPresetRef.current];
 
       const targetPosition = preset.position.clone();
 

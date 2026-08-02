@@ -6,6 +6,7 @@ import About from "./screens/About";
 import Contact from "./screens/Contact";
 import ParticleBackground from "./components/ParticleBackground";
 import { setUIHovered } from "./utils/SceneIntegration";
+import type { ViewMode } from "./utils/CameraPresets";
 
 export type Screen =
   | "menu"
@@ -25,6 +26,9 @@ const sections: Screen[] = [
 function App() {
   const [activeScreen, setActiveScreen] =
     useState<Screen>("menu");
+
+  const [viewMode, setViewMode] =
+    useState<ViewMode>("brief");
 
   const [hoveredIndex, setHoveredIndex] =
     useState<number | null>(null);
@@ -46,6 +50,7 @@ function App() {
   const scrollToSection = (screen: Screen) => {
     setUIHovered(false);
     setHoveredIndex(null);
+    setViewMode("brief");
 
     const targetIndex =
       sections.indexOf(screen);
@@ -102,6 +107,7 @@ function App() {
           screenName === "contact"
         ) {
           setActiveScreen(screenName);
+          setViewMode("brief");
           const idx = sections.indexOf(screenName);
           if (idx !== -1) {
             currentSectionIndexRef.current = idx;
@@ -211,6 +217,7 @@ function App() {
               ? "home"
               : activeScreen
           }
+          viewMode={viewMode}
         />
       </div>
 
@@ -252,6 +259,7 @@ function App() {
         >
           <Projects
             setScreen={scrollToSection}
+            onViewDetails={() => setViewMode("detail")}
           />
         </section>
 
@@ -265,6 +273,7 @@ function App() {
         >
           <Skills
             setScreen={scrollToSection}
+            onViewDetails={() => setViewMode("detail")}
           />
         </section>
 
@@ -278,6 +287,7 @@ function App() {
         >
           <About
             setScreen={scrollToSection}
+            onViewDetails={() => setViewMode("detail")}
           />
         </section>
 
@@ -291,6 +301,7 @@ function App() {
         >
           <Contact
             setScreen={scrollToSection}
+            onViewDetails={() => setViewMode("detail")}
           />
         </section>
       </main>
