@@ -60,6 +60,7 @@ const ParticleBackground = ({
   const hoveredRef = useRef<number | null>(hoveredIndex);
   const currentPresetRef = useRef<SectionName>("home");
   const viewModeRef = useRef<ViewMode>("brief");
+  const prevViewModeRef = useRef<ViewMode>("brief");
   const lookAtTarget = useRef(new THREE.Vector3(0, 0.1, 0));
   const currentRoll = useRef(0);
 
@@ -180,6 +181,9 @@ const ParticleBackground = ({
 
     const RING_RADIUS = 2.5;
     const MIN_ORBIT_DIST = RING_RADIUS + 0.5;
+
+    const LERP_TO_DETAIL = 0.01;
+    const LERP_TO_BRIEF = 0.012;
 
     for (let i = 0; i < COUNT; i++) {
       const angle = Math.random() * Math.PI * 2;
@@ -315,6 +319,12 @@ const ParticleBackground = ({
         ? DETAIL_PRESETS[currentPresetRef.current]
         : CAMERA_PRESETS[currentPresetRef.current];
 
+      // NEW: figure out transition direction and pick a lerp speed
+      const returningToBrief =
+        viewModeRef.current === "brief" && prevViewModeRef.current === "detail";
+
+      const baseLerpSpeed = returningToBrief ? LERP_TO_BRIEF : LERP_TO_DETAIL;
+
       const targetPosition = preset.position.clone();
 
       const bob = Math.sin(time * 0.3) * 0.02;
@@ -326,7 +336,8 @@ const ParticleBackground = ({
         targetPosition.z -= 0.5;
       }
 
-      const cameraLerp = allowMouseMovement && isMoving ? 0.03 : 0.01;
+      // CHANGED: was `allowMouseMovement && isMoving ? 0.03 : 0.01`
+      const cameraLerp = allowMouseMovement && isMoving ? 0.03 : baseLerpSpeed;
       camera.position.lerp(targetPosition, cameraLerp);
 
       const distFromOrigin = camera.position.length();
@@ -335,10 +346,11 @@ const ParticleBackground = ({
         camera.position.lerp(corrected, 0.15); // gentle push-out, not instant
       }
 
+      // CHANGED: was hardcoded 0.03
       const nextFov = THREE.MathUtils.lerp(
         camera.fov,
         preset.fov,
-        0.03
+        baseLerpSpeed
       );
 
       if (Math.abs(camera.fov - nextFov) > 0.001) {
@@ -348,20 +360,22 @@ const ParticleBackground = ({
 
       lookAtTarget.current.lerp(
         preset.lookAt,
-        0.03
+        baseLerpSpeed
       );
 
       currentRoll.current = THREE.MathUtils.lerp(
         currentRoll.current,
         preset.roll,
-        0.03
-      );  
+        baseLerpSpeed
+      );
 
       const forward = lookAtTarget.current.clone().sub(camera.position).normalize();
       const rolledUp = new THREE.Vector3(0, 1, 0).applyAxisAngle(forward, currentRoll.current);
 
       camera.up.copy(rolledUp);
       camera.lookAt(lookAtTarget.current);
+
+      prevViewModeRef.current = viewModeRef.current;
 
       composer.render();
     };

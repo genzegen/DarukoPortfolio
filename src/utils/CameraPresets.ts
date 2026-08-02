@@ -40,7 +40,7 @@ function detailPresetFrom(
     const rotatedPosition = base.position
         .clone()
         .applyAxisAngle(new THREE.Vector3(0, 1, 0), offsetRad)
-        .multiplyScalar(1.15);
+        .multiplyScalar(1.05);
 
     const outwardDirection = 
         rotatedPosition
@@ -55,7 +55,7 @@ function detailPresetFrom(
     )
 
     const detailPosition = rotatedPosition
-        .add(outwardDirection.multiplyScalar(1.2))
+        .add(outwardDirection.multiplyScalar(0.5))
         .add(rightDirection.multiplyScalar(1.4));
 
     const detailLookAt = base.lookAt
