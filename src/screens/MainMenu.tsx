@@ -9,9 +9,9 @@ type Props = {
 };
 
 const menuItems = [
-  { id: "projects" as Screen, label: "MISSIONS", sub: "Projects", index: "01" },
-  { id: "skills" as Screen, label: "STATS", sub: "Skills", index: "02" },
-  { id: "about" as Screen, label: "PROFILE", sub: "About", index: "03" },
+  { id: "about" as Screen, label: "PROFILE", sub: "About", index: "01" },
+  { id: "projects" as Screen, label: "MISSIONS", sub: "Projects", index: "02" },
+  { id: "skills" as Screen, label: "STATS", sub: "Skills", index: "03" },
   { id: "contact" as Screen, label: "JOIN PARTY", sub: "Contact", index: "04" },
 ];
 
@@ -133,7 +133,7 @@ const MainMenu = ({ setScreen, hoveredIndex, setHoveredIndex }: Props) => {
                   fontSize: "clamp(2rem, 3vw, 3.5rem)",
                   letterSpacing: "0.08em",
                   lineHeight: 0.9,
-                  color: isHovered ? "#f0f0f0" : "#aaa",
+                  color: isHovered ? "#fcfcfc" : "#aaa",
                   transform: isHovered ? "translateX(10px)" : "translateX(0px)",
                   transition: "all 0.18s ease",
                   whiteSpace: "nowrap",
@@ -151,9 +151,9 @@ const MainMenu = ({ setScreen, hoveredIndex, setHoveredIndex }: Props) => {
                     transition={{ duration: 0.15 }}
                     style={{
                       fontFamily: "'Share Tech Mono', monospace",
-                      fontSize: "0.7rem",
+                      fontSize: "0.95rem",
                       color: "#e8003a",
-                      letterSpacing: "0.18em",
+                      letterSpacing: "0.13em",
                       marginTop: "0.25rem",
                     }}
                   >

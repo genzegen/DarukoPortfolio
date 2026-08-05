@@ -10,16 +10,16 @@ import type { ViewMode } from "./utils/CameraPresets";
 
 export type Screen =
   | "menu"
+  | "about"
   | "projects"
   | "skills"
-  | "about"
   | "contact";
 
 const sections: Screen[] = [
   "menu",
+  "about",
   "projects",
   "skills",
-  "about",
   "contact",
 ];
 
@@ -37,9 +37,9 @@ function App() {
     Record<Screen, HTMLElement | null>
   >({
     menu: null,
+    about: null,
     projects: null,
     skills: null,
-    about: null,
     contact: null,
   });
 
@@ -101,9 +101,9 @@ function App() {
 
         if (
           screenName === "menu" ||
+          screenName === "about" ||
           screenName === "projects" ||
           screenName === "skills" ||
-          screenName === "about" ||
           screenName === "contact"
         ) {
           setActiveScreen(screenName);
@@ -251,6 +251,20 @@ function App() {
 
         <section
           ref={(element) => {
+            sectionRefs.current.about =
+              element;
+          }}
+          data-screen="about"
+          className="min-h-screen w-full"
+        >
+          <About
+            setScreen={scrollToSection}
+            onViewDetails={() => setViewMode("detail")}
+          />
+        </section>
+
+        <section
+          ref={(element) => {
             sectionRefs.current.projects =
               element;
           }}
@@ -272,20 +286,6 @@ function App() {
           className="min-h-screen w-full"
         >
           <Skills
-            setScreen={scrollToSection}
-            onViewDetails={() => setViewMode("detail")}
-          />
-        </section>
-
-        <section
-          ref={(element) => {
-            sectionRefs.current.about =
-              element;
-          }}
-          data-screen="about"
-          className="min-h-screen w-full"
-        >
-          <About
             setScreen={scrollToSection}
             onViewDetails={() => setViewMode("detail")}
           />
