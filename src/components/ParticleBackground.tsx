@@ -182,7 +182,7 @@ const ParticleBackground = ({
     const RING_RADIUS = 2.5;
     const MIN_ORBIT_DIST = RING_RADIUS + 0.5;
 
-    const LERP_TO_DETAIL = 0.01;
+    const LERP_TO_DETAIL = 0.017;
     const LERP_TO_BRIEF = 0.012;
 
     for (let i = 0; i < COUNT; i++) {
