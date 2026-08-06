@@ -9,6 +9,7 @@ import { isUIHovered } from "../utils/SceneIntegration";
 import { createSpaceAtmosphere } from "./SpaceAtmosphere";
 import { CAMERA_PRESETS, DETAIL_PRESETS } from "../utils/CameraPresets";
 import type { SectionName, ViewMode } from "../utils/CameraPresets";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 type Props = {
   hoveredIndex: number | null;
@@ -163,6 +164,29 @@ const ParticleBackground = ({
     const planet = createPlanetSphere();
     scene.add(planet.group);
 
+    // shrimp avatar loader
+
+    const loader = new GLTFLoader();
+
+    let avatarGroup: THREE.Group | null = null;
+
+    loader.load("/models/shrimp_low_poly.glb", (gltf) => {
+      avatarGroup = new THREE.Group();
+      avatarGroup.name = "avatarGroup";
+      avatarGroup.position.set(
+          1.2,
+          1,
+          0.5
+      );
+
+      gltf.scene.scale.setScalar(0.175);
+
+      avatarGroup.add(gltf.scene);
+      console.log(gltf.animations);
+
+      scene.add(avatarGroup);
+    });
+
     const COUNT = 4500;
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(COUNT * 3);
@@ -313,6 +337,37 @@ const ParticleBackground = ({
 
       planet.update(hoveredRef.current, time);
       spaceAtmosphere.update(clock.getElapsedTime());
+
+      // shrimp avatar animation
+
+      if (avatarGroup) {
+        // Floating
+        avatarGroup.position.y =
+            0.62 +
+            Math.sin(time * 0.7) * 0.05;
+
+        // Gentle left-right drift
+        avatarGroup.position.x =
+            1.2 +
+            Math.sin(time * 0.28) * 1.12;
+
+        // Small forward-back drift
+        avatarGroup.position.z =
+            0.5 +
+            Math.cos(time * 0.35) * 0.08;
+
+        // Looking around
+        avatarGroup.rotation.y =
+            Math.sin(time * 0.45) * 0.22;
+
+        // Tiny head tilt
+        avatarGroup.rotation.z =
+            Math.sin(time * 0.82) * 0.04;
+
+        // Small pitch
+        avatarGroup.rotation.x =
+            Math.cos(time * 0.65) * 0.03;
+      }
 
       // --- Camera transition ---
       const preset = viewModeRef.current === "detail"

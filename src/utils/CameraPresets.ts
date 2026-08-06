@@ -73,9 +73,9 @@ function detailPresetFrom(
 // camera angles for normal (brief) view
 export const CAMERA_PRESETS = {
     home: presetAtAngle(0 * ANGLE_STEP, 72, 0),
-    projects: presetAtAngle(1 * ANGLE_STEP, 65, -0.04),
-    skills: presetAtAngle(2 * ANGLE_STEP, 63, -0.055),
-    about: presetAtAngle(3 * ANGLE_STEP, 59, -0.02),
+    about: presetAtAngle(1 * ANGLE_STEP, 65, -0.04),
+    projects: presetAtAngle(2 * ANGLE_STEP, 63, -0.055),
+    skills: presetAtAngle(3 * ANGLE_STEP, 59, -0.02),
     contact: presetAtAngle(4 * ANGLE_STEP, 64, -0.025),
 } as const;
 
@@ -85,8 +85,8 @@ export type ViewMode = "brief" | "detail";
 // camera angles for detailed view
 export const DETAIL_PRESETS: Record<SectionName, CameraPreset> = {
     home: detailPresetFrom(CAMERA_PRESETS.home, 55, -8),
+    about: detailPresetFrom(CAMERA_PRESETS.about, 55, -8),
     projects: detailPresetFrom(CAMERA_PRESETS.projects, 55, -8),
     skills: detailPresetFrom(CAMERA_PRESETS.skills, 55, -8),
-    about: detailPresetFrom(CAMERA_PRESETS.about, 55, -8),
     contact: detailPresetFrom(CAMERA_PRESETS.contact, 55, -8),
 };
