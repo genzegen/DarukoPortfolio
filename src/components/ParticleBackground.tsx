@@ -338,37 +338,6 @@ const ParticleBackground = ({
       planet.update(hoveredRef.current, time);
       spaceAtmosphere.update(clock.getElapsedTime());
 
-      // shrimp avatar animation
-
-      if (avatarGroup) {
-        // Floating
-        avatarGroup.position.y =
-            0.62 +
-            Math.sin(time * 0.7) * 0.05;
-
-        // Gentle left-right drift
-        avatarGroup.position.x =
-            1.2 +
-            Math.sin(time * 0.28) * 1.12;
-
-        // Small forward-back drift
-        avatarGroup.position.z =
-            0.5 +
-            Math.cos(time * 0.35) * 0.08;
-
-        // Looking around
-        avatarGroup.rotation.y =
-            Math.sin(time * 0.45) * 0.22;
-
-        // Tiny head tilt
-        avatarGroup.rotation.z =
-            Math.sin(time * 0.82) * 0.04;
-
-        // Small pitch
-        avatarGroup.rotation.x =
-            Math.cos(time * 0.65) * 0.03;
-      }
-
       // --- Camera transition ---
       const preset = viewModeRef.current === "detail"
         ? DETAIL_PRESETS[currentPresetRef.current]
