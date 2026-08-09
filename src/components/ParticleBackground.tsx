@@ -166,26 +166,26 @@ const ParticleBackground = ({
 
     // shrimp avatar loader
 
-    const loader = new GLTFLoader();
+    // const loader = new GLTFLoader();
 
-    let avatarGroup: THREE.Group | null = null;
+    // let avatarGroup: THREE.Group | null = null;
 
-    loader.load("/models/shrimp_low_poly.glb", (gltf) => {
-      avatarGroup = new THREE.Group();
-      avatarGroup.name = "avatarGroup";
-      avatarGroup.position.set(
-          1.2,
-          1,
-          0.5
-      );
+    // loader.load("/models/shrimp_low_poly.glb", (gltf) => {
+    //   avatarGroup = new THREE.Group();
+    //   avatarGroup.name = "avatarGroup";
+    //   avatarGroup.position.set(
+    //       1.2,
+    //       1,
+    //       0.5
+    //   );
 
-      gltf.scene.scale.setScalar(0.175);
+    //   gltf.scene.scale.setScalar(0.175);
 
-      avatarGroup.add(gltf.scene);
-      console.log(gltf.animations);
+    //   avatarGroup.add(gltf.scene);
+    //   console.log(gltf.animations);
 
-      scene.add(avatarGroup);
-    });
+    //   scene.add(avatarGroup);
+    // });
 
     const COUNT = 4500;
     const geometry = new THREE.BufferGeometry();
