@@ -164,28 +164,28 @@ const ParticleBackground = ({
     const planet = createPlanetSphere();
     scene.add(planet.group);
 
-    // shrimp avatar loader
+    // among us avatar loader
 
-    // const loader = new GLTFLoader();
+    const loader = new GLTFLoader();
 
-    // let avatarGroup: THREE.Group | null = null;
+    let avatarGroup: THREE.Group | null = null;
 
-    // loader.load("/models/shrimp_low_poly.glb", (gltf) => {
-    //   avatarGroup = new THREE.Group();
-    //   avatarGroup.name = "avatarGroup";
-    //   avatarGroup.position.set(
-    //       1.2,
-    //       1,
-    //       0.5
-    //   );
+    loader.load("/models/amongus_model.glb", (gltf) => {
+      avatarGroup = new THREE.Group();
+      avatarGroup.name = "avatarGroup";
+      avatarGroup.position.set(
+          1.2,
+          0.3,
+          0.5
+      );
 
-    //   gltf.scene.scale.setScalar(0.175);
+      gltf.scene.scale.setScalar(0.00195);
 
-    //   avatarGroup.add(gltf.scene);
-    //   console.log(gltf.animations);
+      avatarGroup.add(gltf.scene);
+      console.log(gltf.animations);
 
-    //   scene.add(avatarGroup);
-    // });
+      scene.add(avatarGroup);
+    });
 
     const COUNT = 4500;
     const geometry = new THREE.BufferGeometry();
@@ -343,7 +343,6 @@ const ParticleBackground = ({
         ? DETAIL_PRESETS[currentPresetRef.current]
         : CAMERA_PRESETS[currentPresetRef.current];
 
-      // NEW: figure out transition direction and pick a lerp speed
       const returningToBrief =
         viewModeRef.current === "brief" && prevViewModeRef.current === "detail";
 
@@ -360,14 +359,13 @@ const ParticleBackground = ({
         targetPosition.z -= 0.5;
       }
 
-      // CHANGED: was `allowMouseMovement && isMoving ? 0.03 : 0.01`
       const cameraLerp = allowMouseMovement && isMoving ? 0.03 : baseLerpSpeed;
       camera.position.lerp(targetPosition, cameraLerp);
 
       const distFromOrigin = camera.position.length();
       if (distFromOrigin < MIN_ORBIT_DIST) {
         const corrected = camera.position.clone().setLength(MIN_ORBIT_DIST);
-        camera.position.lerp(corrected, 0.15); // gentle push-out, not instant
+        camera.position.lerp(corrected, 0.15);
       }
 
       // CHANGED: was hardcoded 0.03

@@ -216,7 +216,7 @@ const MainMenu = ({ setScreen, hoveredIndex, setHoveredIndex }: Props) => {
                     bottom: "-4px",
                     width: "4px",
                     background: ACCENT_RED,
-                    boxShadow: `0 0 10px ${ACCENT_RED}, 0 0 20px ${ACCENT_RED}`,
+                    boxShadow: `0 0 8px ${ACCENT_RED}, 0 0 15px ${ACCENT_RED}`,
                   }}
                 />
               )}
