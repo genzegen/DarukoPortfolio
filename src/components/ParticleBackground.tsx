@@ -338,6 +338,10 @@ const ParticleBackground = ({
       planet.update(hoveredRef.current, time);
       spaceAtmosphere.update(clock.getElapsedTime());
 
+      const delta = clock.getDelta();
+      const avatarTime = clock.getElapsedTime();
+      updateAvatar(time, delta);
+
       // --- Camera transition ---
       const preset = viewModeRef.current === "detail"
         ? DETAIL_PRESETS[currentPresetRef.current]
