@@ -164,8 +164,6 @@ const ParticleBackground = ({
     const planet = createPlanetSphere();
     scene.add(planet.group);
 
-    // --- among us avatar: loader + mixer + hover-reactive state, all inline ---
-
     const loader = new GLTFLoader();
 
     let avatarGroup: THREE.Group | null = null;
@@ -173,7 +171,7 @@ const ParticleBackground = ({
     const avatarClips: Record<string, THREE.AnimationAction> = {};
     const avatarMaterials: THREE.MeshStandardMaterial[] = [];
     let avatarBaseY = 0;
-    let avatarHoverT = 0; // smoothed 0->1, eases toward 1 while any menu item is hovered
+    let avatarHoverT = 0.5; // smoothed 0->1, eases toward 1 while any menu item is hovered
 
     loader.load("/models/amongus_model.glb", (gltf) => {
       avatarGroup = new THREE.Group();
@@ -182,27 +180,27 @@ const ParticleBackground = ({
       avatarBaseY = avatarGroup.position.y;
 
       gltf.scene.scale.setScalar(0.00195);
+
       avatarGroup.add(gltf.scene);
 
-      // Collect standard materials so we can drive an emissive "light up" on
-      // hover. If your model uses MeshBasicMaterial or a custom shader
-      // instead, this array will just stay empty and the glow is skipped —
-      // switch the instanceof check to match whatever your model actually uses.
       gltf.scene.traverse((child) => {
         if (child instanceof THREE.Mesh) {
-          const mats = Array.isArray(child.material) ? child.material : [child.material];
+          const mats = Array.isArray(child.material)
+            ? child.material
+            : [child.material];
+
           mats.forEach((mat) => {
             if (mat instanceof THREE.MeshStandardMaterial) {
-              mat.emissive = new THREE.Color(0x29f1e0); // cyan, matches the HUD accent
-              mat.emissiveIntensity = 0;
+              // Soft red/cyan-ish emissive glow
+              mat.emissive = new THREE.Color(0xff244f);
+              mat.emissiveIntensity = 0.15;
+
               avatarMaterials.push(mat);
             }
           });
         }
       });
 
-      // Baked-in clip animations, if the model has any. This is what
-      // console.log(gltf.animations) was checking for.
       if (gltf.animations.length > 0) {
         avatarMixer = new THREE.AnimationMixer(gltf.scene);
         gltf.animations.forEach((clip) => {
@@ -212,11 +210,6 @@ const ParticleBackground = ({
           "[avatar] baked clips found:",
           gltf.animations.map((c) => c.name)
         );
-
-        // Only one clip on this model ("Take 001" — Blender's default name
-        // for an unrenamed action). Play whichever clip comes first rather
-        // than hardcoding the name, so this keeps working if you rename or
-        // add clips later.
         const firstClipName = Object.keys(avatarClips)[0];
         if (firstClipName) {
           avatarClips[firstClipName].setLoop(THREE.LoopRepeat, Infinity);
@@ -370,26 +363,57 @@ const ParticleBackground = ({
 
       // --- avatar: procedural float + hover reaction ---
       if (avatarGroup) {
+        // Update baked GLB animation
         avatarMixer?.update(delta);
 
         const hovering = hoveredRef.current !== null;
-        // ease toward 1 while hovered, back to 0 when not — this is what
-        // makes the light-up/lift feel like a response instead of a toggle
+
+        // Smooth hover response
         avatarHoverT += ((hovering ? 1 : 0) - avatarHoverT) * 0.06;
 
-        // two offset sine waves instead of one — avoids a robotic, metronome-like bob
-        const floatY = Math.sin(time * 1.1) * 0.12 + Math.sin(time * 0.37 + 1.3) * 0.05;
+        // Natural floating motion
+        const floatY =
+          Math.sin(time * 1.1) * 0.12 +
+          Math.sin(time * 0.37 + 1.3) * 0.05;
+
         const hoverLift = avatarHoverT * 0.08;
 
-        avatarGroup.position.y = avatarBaseY + floatY + hoverLift;
-        avatarGroup.rotation.y += delta * (0.25 + avatarHoverT * 0.6); // spins up a bit on hover
-        avatarGroup.rotation.z = Math.sin(time * 0.6 + 0.8) * 0.04;
+        avatarGroup.position.y =
+          avatarBaseY + floatY + hoverLift;
 
+        // -----------------------------------------
+        // FACE THE CAMERA
+        // -----------------------------------------
+
+        const dx = camera.position.x - avatarGroup.position.x;
+        const dz = camera.position.z - avatarGroup.position.z;
+
+        const targetRotation = Math.atan2(dx, dz);
+
+        avatarGroup.rotation.y = THREE.MathUtils.lerp(
+          avatarGroup.rotation.y,
+          targetRotation,
+          0.08
+        );
+
+        // Keep the gentle sideways tilt
+        avatarGroup.rotation.z =
+          Math.sin(time * 0.6 + 0.8) * 0.04;
+
+        // Slightly grow when hovered
         const hoverScale = 1 + avatarHoverT * 0.06;
+
         avatarGroup.scale.setScalar(hoverScale);
 
+        // -----------------------------------------
+        // SOFT GLOW
+        // -----------------------------------------
+
+        const glowIntensity =
+          0.12 + avatarHoverT * 0.18;
+
         avatarMaterials.forEach((mat) => {
-          mat.emissiveIntensity = avatarHoverT * 0.8;
+          mat.emissiveIntensity = glowIntensity;
         });
       }
 
