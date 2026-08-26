@@ -173,6 +173,9 @@ const ParticleBackground = ({
     let avatarBaseY = 0;
     let avatarHoverT = 0.5; // smoothed 0->1, eases toward 1 while any menu item is hovered
 
+    let faceCameraDelay = 0;
+    let lastCameraAngle = 0;
+
     loader.load("/models/amongus_model.glb", (gltf) => {
       avatarGroup = new THREE.Group();
       avatarGroup.name = "avatarGroup";
@@ -381,20 +384,30 @@ const ParticleBackground = ({
         avatarGroup.position.y =
           avatarBaseY + floatY + hoverLift;
 
-        // -----------------------------------------
-        // FACE THE CAMERA
-        // -----------------------------------------
-
         const dx = camera.position.x - avatarGroup.position.x;
         const dz = camera.position.z - avatarGroup.position.z;
 
         const targetRotation = Math.atan2(dx, dz);
 
-        avatarGroup.rotation.y = THREE.MathUtils.lerp(
-          avatarGroup.rotation.y,
-          targetRotation,
-          0.08
-        );
+        const cameraAngle = Math.atan2(
+          camera.position.x,
+          camera.position.z
+        )
+
+        if (Math.abs(cameraAngle - lastCameraAngle) > 0.01) {
+          faceCameraDelay = 0.06;
+          lastCameraAngle = cameraAngle;
+        }
+
+        if (faceCameraDelay > 0) {
+          faceCameraDelay -= delta;
+        } else {
+          avatarGroup.rotation.y = THREE.MathUtils.lerp(
+            avatarGroup.rotation.y,
+            targetRotation,
+            0.27
+          )
+        }
 
         // Keep the gentle sideways tilt
         avatarGroup.rotation.z =
@@ -409,12 +422,12 @@ const ParticleBackground = ({
         // SOFT GLOW
         // -----------------------------------------
 
-        const glowIntensity =
-          0.12 + avatarHoverT * 0.18;
+        // const glowIntensity =
+        //   0.12 + avatarHoverT * 0.18;
 
-        avatarMaterials.forEach((mat) => {
-          mat.emissiveIntensity = glowIntensity;
-        });
+        // avatarMaterials.forEach((mat) => {
+        //   mat.emissiveIntensity = glowIntensity;
+        // });
       }
 
       const breath = (Math.sin(time * 0.08) + 1) / 2;
