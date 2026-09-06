@@ -1,3 +1,4 @@
+import { memo } from "react";
 import type { Screen } from "../App";
 
 type Props = { 
@@ -70,4 +71,4 @@ const About = ({ setScreen, onViewDetails }: Props) => (
   </div>
 );
 
-export default About;
+export default memo(About);

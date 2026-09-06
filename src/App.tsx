@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import MainMenu from "./screens/MainMenu";
 import Projects from "./screens/Projects";
 import Skills from "./screens/Skills";
@@ -47,7 +47,7 @@ function App() {
   const currentSectionIndexRef = useRef(0);
   const isScrollingRef = useRef(false);
 
-  const scrollToSection = (screen: Screen) => {
+  const scrollToSection = useCallback((screen: Screen) => {
     setUIHovered(false);
     setHoveredIndex(null);
     setViewMode("brief");
@@ -77,7 +77,11 @@ function App() {
     window.setTimeout(() => {
       isScrollingRef.current = false;
     }, 600);
-  };
+  }, []);
+
+  const showDetailView = useCallback(() => {
+    setViewMode("detail");
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -259,7 +263,7 @@ function App() {
         >
           <About
             setScreen={scrollToSection}
-            onViewDetails={() => setViewMode("detail")}
+            onViewDetails={showDetailView}
           />
         </section>
 
@@ -273,7 +277,7 @@ function App() {
         >
           <Projects
             setScreen={scrollToSection}
-            onViewDetails={() => setViewMode("detail")}
+            onViewDetails={showDetailView}
           />
         </section>
 
@@ -287,7 +291,7 @@ function App() {
         >
           <Skills
             setScreen={scrollToSection}
-            onViewDetails={() => setViewMode("detail")}
+            onViewDetails={showDetailView}
           />
         </section>
 
@@ -301,7 +305,7 @@ function App() {
         >
           <Contact
             setScreen={scrollToSection}
-            onViewDetails={() => setViewMode("detail")}
+            onViewDetails={showDetailView}
           />
         </section>
       </main>

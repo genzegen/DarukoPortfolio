@@ -107,6 +107,7 @@ export function createSpaceAtmosphere(): SpaceAtmosphereHandle {
         pulsePhase: number;
         spinSpeed: number;
         driftAxis: THREE.Vector3;
+        driftOffset: THREE.Vector3;
         driftSpeed: number;
         basePosition: THREE.Vector3;
     };
@@ -149,6 +150,7 @@ export function createSpaceAtmosphere(): SpaceAtmosphereHandle {
             randRange(-1, 1),
             randRange(-1, 1)
         ).normalize(),
+        driftOffset: new THREE.Vector3(),
         driftSpeed: randRange(0.0015, 0.004),
         basePosition: position.clone(),
         });
@@ -384,10 +386,10 @@ export function createSpaceAtmosphere(): SpaceAtmosphereHandle {
 
         // tiny orbital drift around its base position
         const driftAngle = time * layer.driftSpeed;
-        const offset = layer.driftAxis
-            .clone()
+        layer.driftOffset
+            .copy(layer.driftAxis)
             .multiplyScalar(Math.sin(driftAngle) * 12);
-        layer.sprite.position.copy(layer.basePosition).add(offset);
+        layer.sprite.position.copy(layer.basePosition).add(layer.driftOffset);
         }
 
         const energyPulse =

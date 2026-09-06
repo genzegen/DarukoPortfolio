@@ -322,6 +322,10 @@ const ParticleBackground = ({
     scene.add(depthPoints);
 
     const clock = new THREE.Clock();
+    const targetPosition = new THREE.Vector3();
+    const correctedPosition = new THREE.Vector3();
+    const forward = new THREE.Vector3();
+    const rolledUp = new THREE.Vector3();
     let animationId: number;
     let rotationSpeed = 0.001;
 
@@ -444,7 +448,7 @@ const ParticleBackground = ({
       depthPoints.rotation.y += rotationSpeed * 0.6;
 
       planet.update(hoveredRef.current, time);
-      spaceAtmosphere.update(clock.getElapsedTime());
+      spaceAtmosphere.update(time);
 
       // --- Camera transition ---
       const preset = viewModeRef.current === "detail"
@@ -456,7 +460,7 @@ const ParticleBackground = ({
 
       const baseLerpSpeed = returningToBrief ? LERP_TO_BRIEF : LERP_TO_DETAIL;
 
-      const targetPosition = preset.position.clone();
+      targetPosition.copy(preset.position);
 
       const bob = Math.sin(time * 0.3) * 0.02;
       targetPosition.y += bob;
@@ -472,8 +476,8 @@ const ParticleBackground = ({
 
       const distFromOrigin = camera.position.length();
       if (distFromOrigin < MIN_ORBIT_DIST) {
-        const corrected = camera.position.clone().setLength(MIN_ORBIT_DIST);
-        camera.position.lerp(corrected, 0.15);
+        correctedPosition.copy(camera.position).setLength(MIN_ORBIT_DIST);
+        camera.position.lerp(correctedPosition, 0.15);
       }
 
       // CHANGED: was hardcoded 0.03
@@ -499,8 +503,8 @@ const ParticleBackground = ({
         baseLerpSpeed
       );
 
-      const forward = lookAtTarget.current.clone().sub(camera.position).normalize();
-      const rolledUp = new THREE.Vector3(0, 1, 0).applyAxisAngle(forward, currentRoll.current);
+      forward.copy(lookAtTarget.current).sub(camera.position).normalize();
+      rolledUp.set(0, 1, 0).applyAxisAngle(forward, currentRoll.current);
 
       camera.up.copy(rolledUp);
       camera.lookAt(lookAtTarget.current);
@@ -537,6 +541,7 @@ const ParticleBackground = ({
       glowTexture.dispose();
       largeGlowTexture.dispose();
       composer.dispose();
+      renderer.dispose();
       spaceAtmosphere.dispose();
 
       if (mount && renderer.domElement.parentElement === mount) {
