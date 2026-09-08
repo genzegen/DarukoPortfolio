@@ -241,7 +241,9 @@ const MainMenu = ({ setScreen, hoveredIndex, setHoveredIndex }: Props) => {
                   letterSpacing: "0.08em",
                   lineHeight: 0.9,
                   color: WHITE,
-                  textShadow: isHovered ? glow(ACCENT_RED, "8px") : glow("rgba(255,255,255,0.35)", "6px"),
+                  textShadow: isHovered
+                    ? glow(ACCENT_RED, "8px")
+                    : glow("rgba(255,255,255,0.35)", "6px"),
                   transform: isHovered ? "translateX(16px)" : "translateX(0px)",
                   transition: "all 0.18s ease",
                   whiteSpace: "nowrap",
@@ -313,9 +315,15 @@ const MainMenu = ({ setScreen, hoveredIndex, setHoveredIndex }: Props) => {
       </AnimatePresence>
 
       <div className="duk-readout">
-        <span>SYS<span className="val">::ONLINE</span></span>
-        <span>SIGNAL<span className="val">::STABLE</span></span>
-        <span>BUILD<span className="val">::v0.1.0</span></span>
+        <span>
+          SYS<span className="val">::ONLINE</span>
+        </span>
+        <span>
+          SIGNAL<span className="val">::STABLE</span>
+        </span>
+        <span>
+          BUILD<span className="val">::v0.1.0</span>
+        </span>
       </div>
     </div>
   );

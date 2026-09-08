@@ -1,74 +1,157 @@
 import { memo } from "react";
+import SectionLayout from "../components/SectionLayout";
+import { monoStyle, panelStyle } from "../components/sectionStyles";
 import type { Screen } from "../App";
+import type { ViewMode } from "../utils/CameraPresets";
 
-type Props = { 
-  setScreen: (s: Screen) => void;
-  onViewDetails?: () => void;
+type Props = {
+  setScreen: (screen: Screen) => void;
+  viewMode: ViewMode;
+  onShowDetail: () => void;
+  onShowBrief: () => void;
 };
+const fieldStyle = {
+  background: "rgba(255,255,255,0.03)",
+  border: "1px solid rgba(255,255,255,0.16)",
+  padding: "0.85rem",
+  color: "#aaa",
+  fontFamily: "var(--font-mono)",
+  fontSize: "0.65rem",
+  letterSpacing: "0.08em",
+} as const;
 
-const Contact = ({ setScreen, onViewDetails }: Props) => (
-  <div 
-    style={{
-      position: "relative",
-      zIndex: 50,
-      width: "100%",
-      minHeight: "100vh",
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "center",
-      padding: "0 clamp(2rem, 8vw, 6rem)",
-    }}
+const Contact = ({ setScreen, viewMode, onShowDetail, onShowBrief }: Props) => (
+  <SectionLayout
+    eyebrow="04 // JOIN PARTY"
+    title="CONTACT"
+    intro={
+      viewMode === "detail"
+        ? "The expanded contact view can become your complete project enquiry flow."
+        : "Start a conversation, collaborate, or follow the next project."
+    }
+    mode={viewMode}
+    setScreen={setScreen}
+    onShowDetail={onShowDetail}
+    onShowBrief={onShowBrief}
   >
-    <button onClick={() => setScreen("menu")} style={{ background: "none", border: "none", cursor: "pointer", color: "#888", fontFamily: "var(--font-mono)", fontSize: "0.7rem", letterSpacing: "0.2em", marginBottom: "2rem", textAlign: "left", width: "fit-content" }}>
-      ← BACK
-    </button>
-    <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.65rem", color: "var(--red)", letterSpacing: "0.3em", marginBottom: "0.5rem" }}>04 // JOIN PARTY</div>
-    <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(2.5rem, 6vw, 5rem)", color: "var(--white)", letterSpacing: "0.05em" }}>CONTACT</h2>
-    <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.7rem", color: "#555", letterSpacing: "0.15em", marginTop: "1rem" }}>CONTENT COMING SOON</p>
-    <button
-      type="button"
-      onClick={onViewDetails}
-      style={{
-        marginTop: "2.5rem",
-        width: "fit-content",
-        padding: "0.9rem 1.5rem",
-        background:
-          "rgba(255, 35, 85, 0.08)",
-        border:
-          "1px solid rgba(255, 55, 100, 0.5)",
-        color: "var(--white)",
-        cursor: "pointer",
-        fontFamily: "var(--font-mono)",
-        fontSize: "0.65rem",
-        letterSpacing: "0.22em",
-        textTransform: "uppercase",
-        transition:
-          "all 0.25s ease",
-      }}
-      onMouseEnter={(event) => {
-        event.currentTarget.style.background =
-          "rgba(255, 35, 85, 0.18)";
-
-        event.currentTarget.style.borderColor =
-          "var(--red)";
-
-        event.currentTarget.style.boxShadow =
-          "0 0 24px rgba(255, 35, 85, 0.2)";
-      }}
-      onMouseLeave={(event) => {
-        event.currentTarget.style.background =
-          "rgba(255, 35, 85, 0.08)";
-
-        event.currentTarget.style.borderColor =
-          "rgba(255, 55, 100, 0.5)";
-
-        event.currentTarget.style.boxShadow =
-          "none";
-      }}
-    >
-      ENTER DETAIL VIEW →
-    </button>
-  </div>
+    {viewMode === "brief" ? (
+      <div
+        style={{
+          ...panelStyle,
+          maxWidth: "64rem",
+          display: "grid",
+          gridTemplateColumns: "1.1fr 0.9fr",
+        }}
+      >
+        <div
+          style={{
+            padding: "clamp(1.5rem, 4vw, 3rem)",
+            borderRight: "1px solid rgba(255,255,255,0.12)",
+          }}
+        >
+          <div style={{ ...monoStyle, color: "#29f1e0", fontSize: "0.6rem" }}>
+            STATUS // ONLINE
+          </div>
+          <h3
+            style={{
+              fontFamily: "var(--font-display)",
+              fontSize: "clamp(2rem, 4vw, 3rem)",
+              letterSpacing: "0.07em",
+              marginTop: "0.8rem",
+            }}
+          >
+            LET’S MAKE SOMETHING
+          </h3>
+          <p
+            style={{
+              ...monoStyle,
+              color: "#aaa",
+              fontSize: "0.7rem",
+              lineHeight: 1.8,
+              marginTop: "0.7rem",
+            }}
+          >
+            Add your availability and the projects you are currently open to
+            discussing.
+          </p>
+        </div>
+        <div
+          style={{
+            padding: "clamp(1.5rem, 4vw, 3rem)",
+            display: "grid",
+            alignContent: "center",
+            gap: "1rem",
+          }}
+        >
+          {["YOUR@EMAIL.COM", "LINKEDIN / PROFILE", "GITHUB / PROFILE"].map(
+            (item) => (
+              <div
+                key={item}
+                style={{
+                  ...monoStyle,
+                  color: "#29f1e0",
+                  fontSize: "0.65rem",
+                  borderBottom: "1px solid rgba(41,241,224,0.25)",
+                  paddingBottom: "0.7rem",
+                }}
+              >
+                {item} →
+              </div>
+            ),
+          )}
+        </div>
+      </div>
+    ) : (
+      <div
+        style={{
+          maxWidth: "58rem",
+          ...panelStyle,
+          padding: "clamp(1.5rem, 4vw, 3rem)",
+        }}
+      >
+        <div style={{ ...monoStyle, color: "var(--red)", fontSize: "0.6rem" }}>
+          PROJECT ENQUIRY // TEMPLATE
+        </div>
+        <h3
+          style={{
+            fontFamily: "var(--font-display)",
+            fontSize: "2rem",
+            letterSpacing: "0.07em",
+            margin: "0.6rem 0 1.5rem",
+          }}
+        >
+          TELL ME ABOUT THE MISSION
+        </h3>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+            gap: "0.75rem",
+          }}
+        >
+          {["NAME", "EMAIL", "PROJECT TYPE", "TIMELINE"].map((field) => (
+            <div key={field} style={fieldStyle}>
+              {field}
+            </div>
+          ))}
+        </div>
+        <div style={{ ...fieldStyle, marginTop: "0.75rem", minHeight: "7rem" }}>
+          PROJECT DETAILS / GOALS / BUDGET
+        </div>
+        <p
+          style={{
+            ...monoStyle,
+            color: "#888",
+            fontSize: "0.6rem",
+            lineHeight: 1.7,
+            marginTop: "1rem",
+          }}
+        >
+          Replace this visual form scaffold with your preferred contact form
+          provider or email link.
+        </p>
+      </div>
+    )}
+  </SectionLayout>
 );
-
 export default memo(Contact);

@@ -46,6 +46,7 @@ function App() {
   const scrollContainerRef = useRef<HTMLElement | null>(null);
   const currentSectionIndexRef = useRef(0);
   const isScrollingRef = useRef(false);
+  const viewModeRef = useRef<ViewMode>("brief");
 
   const scrollToSection = useCallback((screen: Screen) => {
     setUIHovered(false);
@@ -82,6 +83,14 @@ function App() {
   const showDetailView = useCallback(() => {
     setViewMode("detail");
   }, []);
+
+  const showBriefView = useCallback(() => {
+    setViewMode("brief");
+  }, []);
+
+  useEffect(() => {
+    viewModeRef.current = viewMode;
+  }, [viewMode]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -151,6 +160,8 @@ function App() {
     if (!container) return;
 
     const handleWheel = (event: WheelEvent) => {
+      if (viewModeRef.current === "detail") return;
+
       event.preventDefault();
 
       if (isScrollingRef.current) return;
@@ -263,7 +274,9 @@ function App() {
         >
           <About
             setScreen={scrollToSection}
-            onViewDetails={showDetailView}
+            viewMode={viewMode}
+            onShowDetail={showDetailView}
+            onShowBrief={showBriefView}
           />
         </section>
 
@@ -277,7 +290,9 @@ function App() {
         >
           <Projects
             setScreen={scrollToSection}
-            onViewDetails={showDetailView}
+            viewMode={viewMode}
+            onShowDetail={showDetailView}
+            onShowBrief={showBriefView}
           />
         </section>
 
@@ -291,7 +306,9 @@ function App() {
         >
           <Skills
             setScreen={scrollToSection}
-            onViewDetails={showDetailView}
+            viewMode={viewMode}
+            onShowDetail={showDetailView}
+            onShowBrief={showBriefView}
           />
         </section>
 
@@ -305,7 +322,9 @@ function App() {
         >
           <Contact
             setScreen={scrollToSection}
-            onViewDetails={showDetailView}
+            viewMode={viewMode}
+            onShowDetail={showDetailView}
+            onShowBrief={showBriefView}
           />
         </section>
       </main>

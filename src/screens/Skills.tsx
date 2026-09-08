@@ -1,74 +1,133 @@
 import { memo } from "react";
+import SectionLayout from "../components/SectionLayout";
+import { monoStyle, panelStyle } from "../components/sectionStyles";
 import type { Screen } from "../App";
+import type { ViewMode } from "../utils/CameraPresets";
 
-type Props = { 
-  setScreen: (s: Screen) => void;
-  onViewDetails?: () => void;
+type Props = {
+  setScreen: (screen: Screen) => void;
+  viewMode: ViewMode;
+  onShowDetail: () => void;
+  onShowBrief: () => void;
 };
+const groups = [
+  ["FRONTEND", ["REACT", "TYPESCRIPT", "CSS"]],
+  ["BACKEND", ["APIS", "DATABASES", "SERVICES"]],
+  ["TOOLKIT", ["GIT", "TESTING", "DEPLOYMENT"]],
+];
 
-const Skills = ({ setScreen, onViewDetails }: Props) => (
-  <div 
-    style={{
-      position: "relative",
-      zIndex: 50,
-      width: "100%",
-      minHeight: "100vh",
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "center",
-      padding: "0 clamp(2rem, 8vw, 6rem)",
-    }}
+const Skills = ({ setScreen, viewMode, onShowDetail, onShowBrief }: Props) => (
+  <SectionLayout
+    eyebrow="02 // STATS"
+    title="SKILLS"
+    intro={
+      viewMode === "detail"
+        ? "An expanded inventory of tools, strengths, and current learning."
+        : "The core tools and disciplines behind the work."
+    }
+    mode={viewMode}
+    setScreen={setScreen}
+    onShowDetail={onShowDetail}
+    onShowBrief={onShowBrief}
   >
-    <button onClick={() => setScreen("menu")} style={{ background: "none", border: "none", cursor: "pointer", color: "#888", fontFamily: "var(--font-mono)", fontSize: "0.7rem", letterSpacing: "0.2em", marginBottom: "2rem", textAlign: "left", width: "fit-content" }}>
-      ← BACK
-    </button>
-    <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.65rem", color: "var(--red)", letterSpacing: "0.3em", marginBottom: "0.5rem" }}>02 // STATS</div>
-    <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(2.5rem, 6vw, 5rem)", color: "var(--white)", letterSpacing: "0.05em" }}>SKILLS</h2>
-    <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.7rem", color: "#555", letterSpacing: "0.15em", marginTop: "1rem" }}>CONTENT COMING SOON</p>
-    <button
-      type="button"
-      onClick={onViewDetails}
-      style={{
-        marginTop: "2.5rem",
-        width: "fit-content",
-        padding: "0.9rem 1.5rem",
-        background:
-          "rgba(255, 35, 85, 0.08)",
-        border:
-          "1px solid rgba(255, 55, 100, 0.5)",
-        color: "var(--white)",
-        cursor: "pointer",
-        fontFamily: "var(--font-mono)",
-        fontSize: "0.65rem",
-        letterSpacing: "0.22em",
-        textTransform: "uppercase",
-        transition:
-          "all 0.25s ease",
-      }}
-      onMouseEnter={(event) => {
-        event.currentTarget.style.background =
-          "rgba(255, 35, 85, 0.18)";
-
-        event.currentTarget.style.borderColor =
-          "var(--red)";
-
-        event.currentTarget.style.boxShadow =
-          "0 0 24px rgba(255, 35, 85, 0.2)";
-      }}
-      onMouseLeave={(event) => {
-        event.currentTarget.style.background =
-          "rgba(255, 35, 85, 0.08)";
-
-        event.currentTarget.style.borderColor =
-          "rgba(255, 55, 100, 0.5)";
-
-        event.currentTarget.style.boxShadow =
-          "none";
-      }}
-    >
-      ENTER DETAIL VIEW →
-    </button>
-  </div>
+    {viewMode === "brief" ? (
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(15rem, 1fr))",
+          gap: "1rem",
+          maxWidth: "72rem",
+        }}
+      >
+        {groups.map(([group, items], index) => (
+          <article
+            key={group as string}
+            style={{
+              ...panelStyle,
+              padding: "1.5rem",
+              borderTop: `2px solid ${index === 1 ? "#29f1e0" : "var(--red)"}`,
+            }}
+          >
+            <div style={{ ...monoStyle, fontSize: "0.6rem", color: "#888" }}>
+              0{index + 1} // DOMAIN
+            </div>
+            <h3
+              style={{
+                fontFamily: "var(--font-display)",
+                fontSize: "2rem",
+                letterSpacing: "0.07em",
+                margin: "0.8rem 0 1.2rem",
+              }}
+            >
+              {group}
+            </h3>
+            <div style={{ display: "grid", gap: "0.55rem" }}>
+              {(items as string[]).map((item) => (
+                <div
+                  key={item}
+                  style={{
+                    ...monoStyle,
+                    fontSize: "0.65rem",
+                    color: "#c5c5c5",
+                    display: "flex",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <span>{item}</span>
+                  <span style={{ color: "#29f1e0" }}>● ● ●</span>
+                </div>
+              ))}
+            </div>
+          </article>
+        ))}
+      </div>
+    ) : (
+      <div style={{ ...panelStyle, maxWidth: "72rem", overflow: "hidden" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "minmax(10rem, 0.8fr) repeat(3, 1fr)",
+            borderBottom: "1px solid rgba(255,255,255,0.12)",
+            padding: "1rem 1.5rem",
+            ...monoStyle,
+            fontSize: "0.6rem",
+            color: "#29f1e0",
+          }}
+        >
+          <span>CAPABILITY</span>
+          <span>EXPERIENCE</span>
+          <span>CONFIDENCE</span>
+          <span>NOTES</span>
+        </div>
+        {[
+          "FRONTEND DEVELOPMENT",
+          "BACKEND DEVELOPMENT",
+          "DESIGN SYSTEMS",
+          "COLLABORATION",
+        ].map((skill, index) => (
+          <div
+            key={skill}
+            style={{
+              display: "grid",
+              gridTemplateColumns: "minmax(10rem, 0.8fr) repeat(3, 1fr)",
+              gap: "0.5rem",
+              borderBottom: "1px solid rgba(255,255,255,0.08)",
+              padding: "1.1rem 1.5rem",
+              ...monoStyle,
+              fontSize: "0.63rem",
+              color: "#aaa",
+            }}
+          >
+            <strong style={{ color: "var(--white)" }}>{skill}</strong>
+            <span>ADD YEARS</span>
+            <span style={{ color: "#29f1e0" }}>
+              {"● ".repeat(3 + (index % 2))}
+            </span>
+            <span>ADD CONTEXT</span>
+          </div>
+        ))}
+      </div>
+    )}
+  </SectionLayout>
 );
-
 export default memo(Skills);

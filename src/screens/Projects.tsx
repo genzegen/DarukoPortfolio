@@ -1,74 +1,181 @@
 import { memo } from "react";
+import SectionLayout from "../components/SectionLayout";
+import { monoStyle, panelStyle } from "../components/sectionStyles";
 import type { Screen } from "../App";
+import type { ViewMode } from "../utils/CameraPresets";
 
-type Props = { 
-  setScreen: (s: Screen) => void;
-  onViewDetails?: () => void;
+type Props = {
+  setScreen: (screen: Screen) => void;
+  viewMode: ViewMode;
+  onShowDetail: () => void;
+  onShowBrief: () => void;
 };
+const tags = ["STACK", "ROLE", "YEAR"];
 
-const Projects = ({ setScreen, onViewDetails }: Props) => (
-  <div 
-    style={{
-      position: "relative",
-      zIndex: 50,
-      width: "100%",
-      minHeight: "100vh",
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "center",
-      padding: "0 clamp(2rem, 8vw, 6rem)",
-    }}
+const Projects = ({
+  setScreen,
+  viewMode,
+  onShowDetail,
+  onShowBrief,
+}: Props) => (
+  <SectionLayout
+    eyebrow="01 // MISSIONS"
+    title="PROJECTS"
+    intro={
+      viewMode === "detail"
+        ? "A case-study format for explaining the work behind each mission."
+        : "A curated snapshot of selected work and experiments."
+    }
+    mode={viewMode}
+    setScreen={setScreen}
+    onShowDetail={onShowDetail}
+    onShowBrief={onShowBrief}
   >
-    <button onClick={() => setScreen("menu")} style={{ background: "none", border: "none", cursor: "pointer", color: "#888", fontFamily: "var(--font-mono)", fontSize: "0.7rem", letterSpacing: "0.2em", marginBottom: "2rem", textAlign: "left", width: "fit-content" }}>
-      ← BACK
-    </button>
-    <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.65rem", color: "var(--red)", letterSpacing: "0.3em", marginBottom: "0.5rem" }}>01 // MISSIONS</div>
-    <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(2.5rem, 6vw, 5rem)", color: "var(--white)", letterSpacing: "0.05em" }}>PROJECTS</h2>
-    <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.7rem", color: "#555", letterSpacing: "0.15em", marginTop: "1rem" }}>CONTENT COMING SOON</p>
-    <button
-      type="button"
-      onClick={onViewDetails}
-      style={{
-        marginTop: "2.5rem",
-        width: "fit-content",
-        padding: "0.9rem 1.5rem",
-        background:
-          "rgba(255, 35, 85, 0.08)",
-        border:
-          "1px solid rgba(255, 55, 100, 0.5)",
-        color: "var(--white)",
-        cursor: "pointer",
-        fontFamily: "var(--font-mono)",
-        fontSize: "0.65rem",
-        letterSpacing: "0.22em",
-        textTransform: "uppercase",
-        transition:
-          "all 0.25s ease",
-      }}
-      onMouseEnter={(event) => {
-        event.currentTarget.style.background =
-          "rgba(255, 35, 85, 0.18)";
-
-        event.currentTarget.style.borderColor =
-          "var(--red)";
-
-        event.currentTarget.style.boxShadow =
-          "0 0 24px rgba(255, 35, 85, 0.2)";
-      }}
-      onMouseLeave={(event) => {
-        event.currentTarget.style.background =
-          "rgba(255, 35, 85, 0.08)";
-
-        event.currentTarget.style.borderColor =
-          "rgba(255, 55, 100, 0.5)";
-
-        event.currentTarget.style.boxShadow =
-          "none";
-      }}
-    >
-      ENTER DETAIL VIEW →
-    </button>
-  </div>
+    {viewMode === "brief" ? (
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "minmax(0, 1.45fr) minmax(14rem, 0.55fr)",
+          gap: "1rem",
+          maxWidth: "72rem",
+        }}
+      >
+        <article
+          style={{
+            ...panelStyle,
+            minHeight: "19rem",
+            padding: "clamp(1.5rem, 4vw, 3rem)",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "flex-end",
+            background:
+              "linear-gradient(135deg, rgba(232,0,58,0.19), rgba(10,10,16,0.8) 60%)",
+          }}
+        >
+          <div style={{ ...monoStyle, color: "#29f1e0", fontSize: "0.6rem" }}>
+            FEATURED MISSION // 01
+          </div>
+          <h3
+            style={{
+              fontFamily: "var(--font-display)",
+              fontSize: "clamp(2rem, 5vw, 4rem)",
+              letterSpacing: "0.07em",
+              marginTop: "0.7rem",
+            }}
+          >
+            PROJECT NAME
+          </h3>
+          <p
+            style={{
+              ...monoStyle,
+              color: "#c1c1c1",
+              fontSize: "0.7rem",
+              lineHeight: 1.7,
+              maxWidth: "36rem",
+              marginTop: "0.6rem",
+            }}
+          >
+            The short project pitch: what it is, who it helps, and the outcome.
+          </p>
+        </article>
+        <div style={{ display: "grid", gap: "1rem" }}>
+          {["CURRENTLY BUILDING", "PROJECT ARCHIVE"].map((title, index) => (
+            <article key={title} style={{ ...panelStyle, padding: "1.5rem" }}>
+              <div
+                style={{
+                  ...monoStyle,
+                  color: "var(--red)",
+                  fontSize: "0.58rem",
+                }}
+              >
+                0{index + 2} // {index ? "PAST" : "NOW"}
+              </div>
+              <h3
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: "1.5rem",
+                  letterSpacing: "0.07em",
+                  marginTop: "0.5rem",
+                }}
+              >
+                {title}
+              </h3>
+            </article>
+          ))}
+        </div>
+      </div>
+    ) : (
+      <div style={{ maxWidth: "72rem", display: "grid", gap: "1rem" }}>
+        <article style={{ ...panelStyle, padding: "clamp(1.5rem, 4vw, 3rem)" }}>
+          <div style={{ ...monoStyle, color: "#29f1e0", fontSize: "0.6rem" }}>
+            CASE STUDY // PROJECT NAME
+          </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(13rem, 1fr))",
+              gap: "2rem",
+              marginTop: "1.5rem",
+            }}
+          >
+            {[
+              [
+                "THE CHALLENGE",
+                "Define the problem, audience, and constraints.",
+              ],
+              ["THE APPROACH", "Explain the thinking, process, and execution."],
+              ["THE OUTCOME", "Share the impact, learnings, and results."],
+            ].map(([heading, text]) => (
+              <div key={heading}>
+                <h3
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    fontSize: "1.5rem",
+                    letterSpacing: "0.07em",
+                  }}
+                >
+                  {heading}
+                </h3>
+                <p
+                  style={{
+                    ...monoStyle,
+                    color: "#aaa",
+                    fontSize: "0.68rem",
+                    lineHeight: 1.8,
+                    marginTop: "0.6rem",
+                  }}
+                >
+                  {text}
+                </p>
+              </div>
+            ))}
+          </div>
+          <div
+            style={{
+              display: "flex",
+              gap: "0.5rem",
+              flexWrap: "wrap",
+              marginTop: "2rem",
+            }}
+          >
+            {tags.map((tag) => (
+              <span
+                key={tag}
+                style={{
+                  ...monoStyle,
+                  color: "#29f1e0",
+                  border: "1px solid rgba(41,241,224,0.3)",
+                  padding: "0.4rem",
+                  fontSize: "0.58rem",
+                }}
+              >
+                {tag}: ADD VALUE
+              </span>
+            ))}
+          </div>
+        </article>
+      </div>
+    )}
+  </SectionLayout>
 );
-
 export default memo(Projects);
