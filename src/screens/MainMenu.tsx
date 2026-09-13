@@ -204,7 +204,6 @@ const MainMenu = ({ setScreen, hoveredIndex, setHoveredIndex }: Props) => {
                 width: "fit-content",
               }}
             >
-              {/* Shared-layout reticle: slides between items, filled bar instead of a border */}
               {isHovered && (
                 <motion.div
                   layoutId="nav-reticle"
@@ -227,8 +226,8 @@ const MainMenu = ({ setScreen, hoveredIndex, setHoveredIndex }: Props) => {
                   fontSize: "0.8rem",
                   letterSpacing: "0.25em",
                   marginBottom: "0.25rem",
-                  color: ACCENT_CYAN,
-                  textShadow: glow(ACCENT_CYAN, "8px"),
+                  color: ACCENT_RED,
+                  textShadow: glow(ACCENT_RED, "8px"),
                 }}
               >
                 {item.index}
@@ -245,6 +244,7 @@ const MainMenu = ({ setScreen, hoveredIndex, setHoveredIndex }: Props) => {
                     ? glow(ACCENT_RED, "8px")
                     : glow("rgba(255,255,255,0.35)", "6px"),
                   transform: isHovered ? "translateX(16px)" : "translateX(0px)",
+                  transformOrigin: "left center",
                   transition: "all 0.18s ease",
                   whiteSpace: "nowrap",
                 }}
@@ -252,26 +252,23 @@ const MainMenu = ({ setScreen, hoveredIndex, setHoveredIndex }: Props) => {
                 {item.label}
               </div>
 
-              <AnimatePresence>
-                {isHovered && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -3 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -3 }}
-                    transition={{ duration: 0.15 }}
-                    style={{
-                      fontFamily: "'Share Tech Mono', monospace",
-                      fontSize: "0.95rem",
-                      color: ACCENT_CYAN,
-                      textShadow: glow(ACCENT_CYAN, "8px"),
-                      letterSpacing: "0.13em",
-                      marginTop: "0.25rem",
-                    }}
-                  >
-                    {item.sub} →
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              <div
+                style={{
+                  fontFamily: "'Share Tech Mono', monospace",
+                  fontSize: "0.95rem",
+                  color: ACCENT_RED,
+                  textShadow: glow(ACCENT_RED, "8px"),
+                  letterSpacing: "0.13em",
+                  marginTop: "0.25rem",
+                  height: "1.2rem",
+                  opacity: isHovered ? 1 : 0,
+                  transform: isHovered ? "translateY(0)" : "translateY(-3px)",
+                  transition: "opacity 0.15s ease, transform 0.15s ease",
+                  pointerEvents: "none",
+                }}
+              >
+                {item.sub} →
+              </div>
             </motion.button>
           );
         })}
@@ -291,8 +288,8 @@ const MainMenu = ({ setScreen, hoveredIndex, setHoveredIndex }: Props) => {
               style={{
                 fontFamily: "'Share Tech Mono', monospace",
                 fontSize: "0.8rem",
-                color: ACCENT_CYAN,
-                textShadow: glow(ACCENT_CYAN, "8px"),
+                color: ACCENT_RED,
+                textShadow: glow(ACCENT_RED, "8px"),
                 letterSpacing: "0.35em",
               }}
             >

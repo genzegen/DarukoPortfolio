@@ -15,34 +15,45 @@ const About = ({ setScreen, onViewDetails }: Props) => (
       minHeight: "100vh",
       display: "flex",
       flexDirection: "column",
-      justifyContent: "center",
-      padding: "0 clamp(2rem, 8vw, 6rem)",
+      justifyContent: "flex-start",
+      padding: "2rem clamp(2rem, 8vw, 6rem) 0",
     }}
   >
-    <button
-      onClick={() => setScreen("menu")}
-      style={{
-        background: "none",
-        border: "none",
-        cursor: "pointer",
-        color: "#888",
-        fontFamily: "var(--font-mono)",
-        fontSize: "0.7rem",
-        letterSpacing: "0.2em",
-        marginBottom: "2rem",
-        textAlign: "left",
-        width: "fit-content",
-      }}
-    >
-      ← BACK
-    </button>
+    <div style={{ height: '3rem' }}>
+      <button
+        onClick={() => setScreen("menu")}
+        style={{
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          color: "#888",
+          fontFamily: "var(--font-mono)",
+          fontSize: "0.75rem",
+          letterSpacing: "0.2em",
+          marginBottom: "2rem",
+          textAlign: "left",
+          width: "fit-content",
+          transition: "color 0.2s ease, transform 0.2s ease",
+          transformOrigin: "left center",
+        }}
+        onMouseEnter={(event) => {
+          event.currentTarget.style.color = "#FFCABF";
+          event.currentTarget.style.transform = "scale(1.07";
+        }}
+        onMouseLeave={(event) => {
+          event.currentTarget.style.color = "#888";
+          event.currentTarget.style.transform = "scale(1)";
+        }}>
+        ← BACK
+      </button>
+    </div>
     <div
       style={{
         fontFamily: "var(--font-mono)",
         fontSize: "0.65rem",
         color: "var(--red)",
         letterSpacing: "0.3em",
-        marginBottom: "0.5rem",
+        marginBottom: "0.2rem",
       }}
     >
       03 // PROFILE
