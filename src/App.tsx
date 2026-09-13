@@ -8,34 +8,18 @@ import ParticleBackground from "./components/ParticleBackground";
 import { setUIHovered } from "./utils/SceneIntegration";
 import type { ViewMode } from "./utils/CameraPresets";
 
-export type Screen =
-  | "menu"
-  | "about"
-  | "projects"
-  | "skills"
-  | "contact";
+export type Screen = "menu" | "about" | "projects" | "skills" | "contact";
 
-const sections: Screen[] = [
-  "menu",
-  "about",
-  "projects",
-  "skills",
-  "contact",
-];
+const sections: Screen[] = ["menu", "about", "projects", "skills", "contact"];
 
 function App() {
-  const [activeScreen, setActiveScreen] =
-    useState<Screen>("menu");
+  const [activeScreen, setActiveScreen] = useState<Screen>("menu");
 
-  const [viewMode, setViewMode] =
-    useState<ViewMode>("brief");
+  const [viewMode, setViewMode] = useState<ViewMode>("brief");
 
-  const [hoveredIndex, setHoveredIndex] =
-    useState<number | null>(null);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
-  const sectionRefs = useRef<
-    Record<Screen, HTMLElement | null>
-  >({
+  const sectionRefs = useRef<Record<Screen, HTMLElement | null>>({
     menu: null,
     about: null,
     projects: null,
@@ -52,15 +36,13 @@ function App() {
     setHoveredIndex(null);
     setViewMode("brief");
 
-    const targetIndex =
-      sections.indexOf(screen);
+    const targetIndex = sections.indexOf(screen);
 
     if (targetIndex !== -1) {
       currentSectionIndexRef.current = targetIndex;
     }
 
-    const targetSection =
-      sectionRefs.current[screen];
+    const targetSection = sectionRefs.current[screen];
 
     if (!targetSection) {
       isScrollingRef.current = false;
@@ -88,20 +70,13 @@ function App() {
       (entries) => {
         const visibleEntries = entries
           .filter((entry) => entry.isIntersecting)
-          .sort(
-            (a, b) =>
-              b.intersectionRatio -
-              a.intersectionRatio
-          );
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
 
         const mostVisible = visibleEntries[0];
 
         if (!mostVisible) return;
 
-        const screenName =
-          mostVisible.target.getAttribute(
-            "data-screen"
-          );
+        const screenName = mostVisible.target.getAttribute("data-screen");
 
         if (
           screenName === "menu" ||
@@ -121,20 +96,12 @@ function App() {
       {
         root: null,
         threshold: 0.5,
-      }
+      },
     );
 
     const currentSections = sections
-      .map(
-        (screen) =>
-          sectionRefs.current[screen]
-      )
-      .filter(
-        (
-          section
-        ): section is HTMLElement =>
-          section !== null
-      );
+      .map((screen) => sectionRefs.current[screen])
+      .filter((section): section is HTMLElement => section !== null);
 
     currentSections.forEach((section) => {
       observer.observe(section);
@@ -157,35 +124,27 @@ function App() {
 
       if (Math.abs(event.deltaY) < 10) return;
 
-      const direction =
-        event.deltaY > 0 ? 1 : -1;
+      const direction = event.deltaY > 0 ? 1 : -1;
 
       const nextIndex = Math.max(
         0,
         Math.min(
           sections.length - 1,
-          currentSectionIndexRef.current +
-            direction
-        )
+          currentSectionIndexRef.current + direction,
+        ),
       );
 
-      if (
-        nextIndex ===
-        currentSectionIndexRef.current
-      ) {
+      if (nextIndex === currentSectionIndexRef.current) {
         return;
       }
 
       isScrollingRef.current = true;
 
-      currentSectionIndexRef.current =
-        nextIndex;
+      currentSectionIndexRef.current = nextIndex;
 
-      const nextScreen =
-        sections[nextIndex];
+      const nextScreen = sections[nextIndex];
 
-      const targetSection =
-        sectionRefs.current[nextScreen];
+      const targetSection = sectionRefs.current[nextScreen];
 
       targetSection?.scrollIntoView({
         behavior: "smooth",
@@ -197,17 +156,10 @@ function App() {
       }, 900);
     };
 
-    container.addEventListener(
-      "wheel",
-      handleWheel,
-      { passive: false }
-    );
+    container.addEventListener("wheel", handleWheel, { passive: false });
 
     return () => {
-      container.removeEventListener(
-        "wheel",
-        handleWheel
-      );
+      container.removeEventListener("wheel", handleWheel);
     };
   }, []);
 
@@ -216,11 +168,7 @@ function App() {
       <div className="fixed inset-0 z-0 pointer-events-none">
         <ParticleBackground
           hoveredIndex={hoveredIndex}
-          activeScreen={
-            activeScreen === "menu"
-              ? "home"
-              : activeScreen
-          }
+          activeScreen={activeScreen === "menu" ? "home" : activeScreen}
           viewMode={viewMode}
         />
       </div>
@@ -238,8 +186,7 @@ function App() {
       >
         <section
           ref={(element) => {
-            sectionRefs.current.menu =
-              element;
+            sectionRefs.current.menu = element;
           }}
           data-screen="menu"
           className="min-h-screen w-full"
@@ -247,30 +194,23 @@ function App() {
           <MainMenu
             setScreen={scrollToSection}
             hoveredIndex={hoveredIndex}
-            setHoveredIndex={
-              setHoveredIndex
-            }
+            setHoveredIndex={setHoveredIndex}
           />
         </section>
 
         <section
           ref={(element) => {
-            sectionRefs.current.about =
-              element;
+            sectionRefs.current.about = element;
           }}
           data-screen="about"
           className="min-h-screen w-full"
         >
-          <About
-            setScreen={scrollToSection}
-            onViewDetails={showDetailView}
-          />
+          <About setScreen={scrollToSection} onViewDetails={showDetailView} />
         </section>
 
         <section
           ref={(element) => {
-            sectionRefs.current.projects =
-              element;
+            sectionRefs.current.projects = element;
           }}
           data-screen="projects"
           className="min-h-screen w-full"
@@ -283,30 +223,22 @@ function App() {
 
         <section
           ref={(element) => {
-            sectionRefs.current.skills =
-              element;
+            sectionRefs.current.skills = element;
           }}
           data-screen="skills"
           className="min-h-screen w-full"
         >
-          <Skills
-            setScreen={scrollToSection}
-            onViewDetails={showDetailView}
-          />
+          <Skills setScreen={scrollToSection} onViewDetails={showDetailView} />
         </section>
 
         <section
           ref={(element) => {
-            sectionRefs.current.contact =
-              element;
+            sectionRefs.current.contact = element;
           }}
           data-screen="contact"
           className="min-h-screen w-full"
         >
-          <Contact
-            setScreen={scrollToSection}
-            onViewDetails={showDetailView}
-          />
+          <Contact setScreen={scrollToSection} onViewDetails={showDetailView} />
         </section>
       </main>
     </div>
@@ -314,4 +246,3 @@ function App() {
 }
 
 export default App;
-

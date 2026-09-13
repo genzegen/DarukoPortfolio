@@ -1,29 +1,33 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap");
 
 /* AFTER the imports */
 :root {
-  --bg:          #0a0a0a;
-  --bg-2:        #111111;
-  --bg-3:        #1a1a1a;
-  --red:         #e8003a;
-  --red-dim:     #9b0027;
-  --red-glow:    rgba(232, 0, 58, 0.15);
-  --white:       #f0f0f0;
-  --white-dim:   #888888;
+  --bg: #0a0a0a;
+  --bg-2: #111111;
+  --bg-3: #1a1a1a;
+  --red: #e8003a;
+  --red-dim: #9b0027;
+  --red-glow: rgba(232, 0, 58, 0.15);
+  --white: #f0f0f0;
+  --white-dim: #888888;
   --white-faint: #333333;
-  --font-display: 'Bebas Neue', sans-serif;
-  --font-body:    'Rajdhani', sans-serif;
-  --font-mono:    'Share Tech Mono', monospace;
+  --font-display: "Bebas Neue", sans-serif;
+  --font-body: "Rajdhani", sans-serif;
+  --font-mono: "Share Tech Mono", monospace;
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-html, body, #root {
+html,
+body,
+#root {
   width: 100%;
   min-height: 100%;
   margin: 0;
@@ -37,6 +41,12 @@ html, body, #root {
   color: #fff;
 }
 
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--red-dim); }
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--red-dim);
+}

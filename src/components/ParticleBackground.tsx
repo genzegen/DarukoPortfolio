@@ -32,7 +32,7 @@ function createGlowTexture() {
     0,
     size / 2,
     size / 2,
-    size / 2
+    size / 2,
   );
 
   gradient.addColorStop(0.0, "rgba(255, 255, 255, 1.0)");
@@ -70,8 +70,7 @@ const ParticleBackground = ({
   }, [hoveredIndex]);
 
   useEffect(() => {
-    currentPresetRef.current =
-      activeScreen as keyof typeof CAMERA_PRESETS;
+    currentPresetRef.current = activeScreen as keyof typeof CAMERA_PRESETS;
   }, [activeScreen]);
 
   useEffect(() => {
@@ -111,7 +110,7 @@ const ParticleBackground = ({
       72,
       window.innerWidth / window.innerHeight,
       0.1,
-      1000
+      1000,
     );
 
     // Initial camera placement — snap straight to the home preset.
@@ -153,7 +152,7 @@ const ParticleBackground = ({
       new THREE.Vector2(window.innerWidth, window.innerHeight),
       0.98,
       0.6,
-      0.45
+      0.45,
     );
 
     composer.addPass(bloomPass);
@@ -211,7 +210,7 @@ const ParticleBackground = ({
         });
         console.log(
           "[avatar] baked clips found:",
-          gltf.animations.map((c) => c.name)
+          gltf.animations.map((c) => c.name),
         );
         const firstClipName = Object.keys(avatarClips)[0];
         if (firstClipName) {
@@ -305,7 +304,10 @@ const ParticleBackground = ({
       depthPositions[i * 3 + 2] = Math.sin(angle) * r;
     }
 
-    depthGeometry.setAttribute("position", new THREE.BufferAttribute(depthPositions, 3));
+    depthGeometry.setAttribute(
+      "position",
+      new THREE.BufferAttribute(depthPositions, 3),
+    );
 
     const largeGlowTexture = createLargeGlowTexture();
     const depthMaterial = new THREE.PointsMaterial({
@@ -346,9 +348,11 @@ const ParticleBackground = ({
         const bz = Math.sin(angles[i]) * r;
         const by = Math.sin(angles[i] * 2 + time) * 0.03;
 
-        const dx = Math.sin(time * noiseFreqX[i] + noiseOffX[i]) * noiseAmpXZ[i];
+        const dx =
+          Math.sin(time * noiseFreqX[i] + noiseOffX[i]) * noiseAmpXZ[i];
         const dy = Math.sin(time * noiseFreqY[i] + noiseOffY[i]) * noiseAmpY[i];
-        const dz = Math.cos(time * noiseFreqZ[i] + noiseOffZ[i]) * noiseAmpXZ[i];
+        const dz =
+          Math.cos(time * noiseFreqZ[i] + noiseOffZ[i]) * noiseAmpXZ[i];
 
         pos.setXYZ(i, bx + dx, by + dy, bz + dz);
       }
@@ -363,7 +367,7 @@ const ParticleBackground = ({
           i,
           Math.cos(depthAngles[i]) * r,
           Math.sin(depthAngles[i] * 1.5 + time * 0.4) * 0.06,
-          Math.sin(depthAngles[i]) * r
+          Math.sin(depthAngles[i]) * r,
         );
       }
       dpos.needsUpdate = true;
@@ -380,23 +384,18 @@ const ParticleBackground = ({
 
         // Natural floating motion
         const floatY =
-          Math.sin(time * 1.1) * 0.12 +
-          Math.sin(time * 0.37 + 1.3) * 0.05;
+          Math.sin(time * 1.1) * 0.12 + Math.sin(time * 0.37 + 1.3) * 0.05;
 
         const hoverLift = avatarHoverT * 0.08;
 
-        avatarGroup.position.y =
-          avatarBaseY + floatY + hoverLift;
+        avatarGroup.position.y = avatarBaseY + floatY + hoverLift;
 
         const dx = camera.position.x - avatarGroup.position.x;
         const dz = camera.position.z - avatarGroup.position.z;
 
         const targetRotation = Math.atan2(dx, dz);
 
-        const cameraAngle = Math.atan2(
-          camera.position.x,
-          camera.position.z
-        )
+        const cameraAngle = Math.atan2(camera.position.x, camera.position.z);
 
         if (Math.abs(cameraAngle - lastCameraAngle) > 0.01) {
           faceCameraDelay = 0.06;
@@ -409,13 +408,12 @@ const ParticleBackground = ({
           avatarGroup.rotation.y = THREE.MathUtils.lerp(
             avatarGroup.rotation.y,
             targetRotation,
-            0.27
-          )
+            0.27,
+          );
         }
 
         // Keep the gentle sideways tilt
-        avatarGroup.rotation.z =
-          Math.sin(time * 0.6 + 0.8) * 0.04;
+        avatarGroup.rotation.z = Math.sin(time * 0.6 + 0.8) * 0.04;
 
         // Slightly grow when hovered
         const hoverScale = 1 + avatarHoverT * 0.06;
@@ -451,9 +449,10 @@ const ParticleBackground = ({
       spaceAtmosphere.update(time);
 
       // --- Camera transition ---
-      const preset = viewModeRef.current === "detail"
-        ? DETAIL_PRESETS[currentPresetRef.current]
-        : CAMERA_PRESETS[currentPresetRef.current];
+      const preset =
+        viewModeRef.current === "detail"
+          ? DETAIL_PRESETS[currentPresetRef.current]
+          : CAMERA_PRESETS[currentPresetRef.current];
 
       const returningToBrief =
         viewModeRef.current === "brief" && prevViewModeRef.current === "detail";
@@ -484,7 +483,7 @@ const ParticleBackground = ({
       const nextFov = THREE.MathUtils.lerp(
         camera.fov,
         preset.fov,
-        baseLerpSpeed
+        baseLerpSpeed,
       );
 
       if (Math.abs(camera.fov - nextFov) > 0.001) {
@@ -492,15 +491,12 @@ const ParticleBackground = ({
         camera.updateProjectionMatrix();
       }
 
-      lookAtTarget.current.lerp(
-        preset.lookAt,
-        baseLerpSpeed
-      );
+      lookAtTarget.current.lerp(preset.lookAt, baseLerpSpeed);
 
       currentRoll.current = THREE.MathUtils.lerp(
         currentRoll.current,
         preset.roll,
-        baseLerpSpeed
+        baseLerpSpeed,
       );
 
       forward.copy(lookAtTarget.current).sub(camera.position).normalize();

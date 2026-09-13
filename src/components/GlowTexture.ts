@@ -15,7 +15,7 @@ export function createLargeGlowTexture() {
     0,
     size / 2,
     size / 2,
-    size / 2
+    size / 2,
   );
 
   gradient.addColorStop(0.0, "rgba(255, 120, 140, 0.6)");

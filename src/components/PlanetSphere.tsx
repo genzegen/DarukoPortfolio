@@ -25,15 +25,9 @@ export function createPlanetSphere(): PlanetSphereHandle {
   for (let i = 0; i < position.count; i++) {
     const vertex = new THREE.Vector3().fromBufferAttribute(position, i);
 
-    const noise = noise3D(
-      vertex.x * 2,
-      vertex.y * 2,
-      vertex.z * 2
-    );
+    const noise = noise3D(vertex.x * 2, vertex.y * 2, vertex.z * 2);
 
-    vertex.normalize().multiplyScalar(
-      1 + noise * 0.03
-    );
+    vertex.normalize().multiplyScalar(1 + noise * 0.03);
 
     position.setXYZ(i, vertex.x, vertex.y, vertex.z);
   }
@@ -56,7 +50,7 @@ export function createPlanetSphere(): PlanetSphereHandle {
     emissive: new THREE.Color(0x7a1048),
     emissiveIntensity: 0.15,
   });
-  
+
   const coreMesh = new THREE.Mesh(sphereGeo, coreMat);
   coreMesh.scale.setScalar(0.985);
   group.add(coreMesh);
@@ -88,29 +82,19 @@ export function createPlanetSphere(): PlanetSphereHandle {
 
     const target = isHovered ? 0.4 : 0.3;
     const targetSpin = isUIHovered ? 0.038 : 0.0018;
-    planetSpinSpeed = THREE.MathUtils.lerp(
-      planetSpinSpeed,
-      targetSpin,
-      0.05
-    );
+    planetSpinSpeed = THREE.MathUtils.lerp(planetSpinSpeed, targetSpin, 0.05);
 
     coreMat.emissiveIntensity = THREE.MathUtils.lerp(
       coreMat.emissiveIntensity,
       target + Math.sin(time * 1.4) * 0.03,
-      0.08
+      0.08,
     );
 
     const pulse = 1 + Math.sin(time * 0.8) * 0.05;
 
-    smokeSprite.scale.set(
-      2.8 * pulse,
-      2.8 * pulse,
-      1
-    );  
+    smokeSprite.scale.set(2.8 * pulse, 2.8 * pulse, 1);
 
-    smokeSprite.material.opacity =
-      0.25 + Math.sin(time * 0.5) * 0.05;
-
+    smokeSprite.material.opacity = 0.25 + Math.sin(time * 0.5) * 0.05;
   };
 
   // Dispose
