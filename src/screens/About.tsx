@@ -19,7 +19,7 @@ const About = ({ setScreen, onViewDetails }: Props) => (
       padding: "2rem clamp(2rem, 8vw, 6rem) 0",
     }}
   >
-    <div style={{ height: '3rem' }}>
+    <div style={{ height: "3rem" }}>
       <button
         onClick={() => setScreen("menu")}
         style={{
@@ -43,7 +43,8 @@ const About = ({ setScreen, onViewDetails }: Props) => (
         onMouseLeave={(event) => {
           event.currentTarget.style.color = "#888";
           event.currentTarget.style.transform = "scale(1)";
-        }}>
+        }}
+      >
         ← BACK
       </button>
     </div>
