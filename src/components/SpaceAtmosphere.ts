@@ -1,5 +1,10 @@
 import * as THREE from "three";
 
+// Same general side as the pink glow on the planet, but far away.
+export const SUN_DIRECTION = new THREE.Vector3(-4.5, 2.6, 3.5).normalize();
+export const SUN_DISTANCE = 380;
+export const SUN_POSITION = SUN_DIRECTION.clone().multiplyScalar(SUN_DISTANCE);
+
 export type SpaceAtmosphereHandle = {
   group: THREE.Group;
   update: (time: number) => void;
@@ -68,6 +73,29 @@ function makeStarTexture(size = 64): THREE.CanvasTexture {
   gradient.addColorStop(0.2, "rgba(255, 255, 255, 0.9)");
   gradient.addColorStop(0.5, "rgba(255, 255, 255, 0.25)");
   gradient.addColorStop(1.0, "rgba(255, 255, 255, 0.0)");
+
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, size, size);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.needsUpdate = true;
+  return texture;
+}
+
+// Sun core: solid white center with a steep falloff
+function makeSunCoreTexture(size = 256): THREE.CanvasTexture {
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d")!;
+
+  const c = size / 2;
+  const gradient = ctx.createRadialGradient(c, c, 0, c, c, c);
+  gradient.addColorStop(0.0, "rgba(255, 255, 255, 1.0)");
+  gradient.addColorStop(0.18, "rgba(255, 250, 252, 1.0)");
+  gradient.addColorStop(0.3, "rgba(255, 200, 220, 0.55)");
+  gradient.addColorStop(0.55, "rgba(255, 120, 160, 0.12)");
+  gradient.addColorStop(1.0, "rgba(255, 80, 130, 0.0)");
 
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, size, size);
@@ -159,88 +187,58 @@ export function createSpaceAtmosphere(): SpaceAtmosphereHandle {
   group.add(nebulaGroup);
 
   // -------------------- distant energy source --------------------
+  // Placed far away (like a real star) instead of a few units from the
+  // planet: no parallax when the camera orbits, and the planet occludes it.
   const lightSourceGroup = new THREE.Group();
 
   lightSourceGroup.name = "distantEnergySource";
+  lightSourceGroup.position.copy(SUN_POSITION);
 
-  // Positioned on the same general side as
-  // the pink glow visible on the planet.
-  lightSourceGroup.position.set(-4.5, 2.6, 3.5);
+  const sunSprite = (
+    texture: THREE.Texture,
+    color: number,
+    opacity: number,
+    name: string,
+  ) => {
+    disposables.push(texture);
+    const material = new THREE.SpriteMaterial({
+      map: texture,
+      color,
+      transparent: true,
+      opacity,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+    });
+    disposables.push(material);
+    const sprite = new THREE.Sprite(material);
+    sprite.name = name;
+    lightSourceGroup.add(sprite);
+    return { sprite, material };
+  };
 
-  // Large outer glow
-  const outerGlowTexture = makeGlowTexture("#ff2f6d", 512);
-
-  disposables.push(outerGlowTexture);
-
-  const outerGlowMaterial = new THREE.SpriteMaterial({
-    map: outerGlowTexture,
-    color: 0xff2f6d,
-    transparent: true,
-    opacity: 0.5,
-    depthWrite: false,
-    depthTest: false,
-    blending: THREE.AdditiveBlending,
-  });
-
-  disposables.push(outerGlowMaterial);
-
-  const outerGlow = new THREE.Sprite(outerGlowMaterial);
-
-  outerGlow.name = "energyOuterGlow";
-
-  outerGlow.scale.set(4.2, 3.2, 1);
-
-  lightSourceGroup.add(outerGlow);
-
-  // Stronger middle glow
-  const middleGlowTexture = makeGlowTexture("#ff6b9a", 256);
-
-  disposables.push(middleGlowTexture);
-
-  const middleGlowMaterial = new THREE.SpriteMaterial({
-    map: middleGlowTexture,
-    color: 0xff5c8a,
-    transparent: true,
-    opacity: 1,
-    depthWrite: false,
-    depthTest: false,
-    blending: THREE.AdditiveBlending,
-  });
-
-  disposables.push(middleGlowMaterial);
-
-  const middleGlow = new THREE.Sprite(middleGlowMaterial);
-
-  middleGlow.name = "energyMiddleGlow";
-
-  middleGlow.scale.set(3.5, 3.5, 1);
-
-  lightSourceGroup.add(middleGlow);
-
-  // Bright central core
-  const coreGlowTexture = makeGlowTexture("#ffffff", 256);
-
-  disposables.push(coreGlowTexture);
-
-  const coreGlowMaterial = new THREE.SpriteMaterial({
-    map: coreGlowTexture,
-    color: 0xffffff,
-    transparent: true,
-    opacity: 1,
-    depthWrite: false,
-    depthTest: false,
-    blending: THREE.AdditiveBlending,
-  });
-
-  disposables.push(coreGlowMaterial);
-
-  const coreGlow = new THREE.Sprite(coreGlowMaterial);
-
-  coreGlow.name = "energyCore";
-
-  coreGlow.scale.set(1.2, 1.2, 1);
-
-  lightSourceGroup.add(coreGlow);
+  // Very wide, faint scatter — tints the surrounding sky
+  const scatter = sunSprite(
+    makeGlowTexture("#ff2f6d", 512),
+    0xff2f6d,
+    0.14,
+    "energyScatter",
+  );
+  // Atmospheric halo
+  const outer = sunSprite(
+    makeGlowTexture("#ff4f85", 512),
+    0xff4f85,
+    0.32,
+    "energyOuterGlow",
+  );
+  // Corona
+  const middle = sunSprite(
+    makeGlowTexture("#ffb0c8", 256),
+    0xffc2d4,
+    0.5,
+    "energyMiddleGlow",
+  );
+  // Hot, small, near-white core
+  const core = sunSprite(makeSunCoreTexture(), 0xffffff, 1, "energyCore");
 
   group.add(lightSourceGroup);
 
@@ -327,28 +325,18 @@ export function createSpaceAtmosphere(): SpaceAtmosphereHandle {
       layer.sprite.position.copy(layer.basePosition).add(layer.driftOffset);
     }
 
-    const energyPulse = 1 + Math.sin(time * 0.8) * 0.08;
+    // Angular sizes (radians) scaled by distance; only a faint shimmer —
+    // a real star doesn't visibly breathe.
+    const shimmer = 1 + Math.sin(time * 0.8) * 0.015;
+    const d = SUN_DISTANCE;
 
-    const secondaryPulse = 1 + Math.sin(time * 1.15 + 1) * 0.06;
+    scatter.sprite.scale.setScalar(0.95 * d * shimmer);
+    outer.sprite.scale.setScalar(0.38 * d * shimmer);
+    middle.sprite.scale.setScalar(0.12 * d * (1 + Math.sin(time * 1.15 + 1) * 0.02));
+    core.sprite.scale.setScalar(0.045 * d);
 
-    // Large atmospheric halo
-    outerGlow.scale.set(6.2 * energyPulse, 4.2 * energyPulse, 1);
-
-    outerGlowMaterial.opacity = 0.42 + Math.sin(time * 0.65) * 0.06;
-
-    // Brighter inner energy
-    middleGlow.scale.set(3.5 * secondaryPulse, 3.5 * secondaryPulse, 1);
-
-    middleGlowMaterial.opacity = 0.4 + Math.sin(time * 1.1) * 0.1;
-
-    // Small bright center
-    coreGlow.scale.set(
-      1.2 * (1 + Math.sin(time * 1.5) * 0.05),
-      1.2 * (1 + Math.sin(time * 1.5) * 0.05),
-      1,
-    );
-
-    coreGlowMaterial.opacity = 0.95 + Math.sin(time * 1.4) * 0.05;
+    outer.material.opacity = 0.32 + Math.sin(time * 0.65) * 0.02;
+    middle.material.opacity = 0.5 + Math.sin(time * 1.1) * 0.03;
   }
 
   function dispose() {

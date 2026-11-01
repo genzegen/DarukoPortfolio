@@ -65,6 +65,24 @@ function App() {
     setViewMode("detail");
   }, []);
 
+  const exitDetailView = useCallback(() => {
+    setViewMode("brief");
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setViewMode("brief");
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -205,7 +223,12 @@ function App() {
           data-screen="about"
           className="min-h-screen w-full"
         >
-          <About setScreen={scrollToSection} onViewDetails={showDetailView} />
+          <About
+            setScreen={scrollToSection}
+            viewMode={viewMode}
+            onViewDetails={showDetailView}
+            onExitDetails={exitDetailView}
+          />
         </section>
 
         <section
@@ -217,7 +240,9 @@ function App() {
         >
           <Projects
             setScreen={scrollToSection}
+            viewMode={viewMode}
             onViewDetails={showDetailView}
+            onExitDetails={exitDetailView}
           />
         </section>
 
@@ -228,7 +253,12 @@ function App() {
           data-screen="skills"
           className="min-h-screen w-full"
         >
-          <Skills setScreen={scrollToSection} onViewDetails={showDetailView} />
+          <Skills
+            setScreen={scrollToSection}
+            viewMode={viewMode}
+            onViewDetails={showDetailView}
+            onExitDetails={exitDetailView}
+          />
         </section>
 
         <section
@@ -238,7 +268,12 @@ function App() {
           data-screen="contact"
           className="min-h-screen w-full"
         >
-          <Contact setScreen={scrollToSection} onViewDetails={showDetailView} />
+          <Contact
+            setScreen={scrollToSection}
+            viewMode={viewMode}
+            onViewDetails={showDetailView}
+            onExitDetails={exitDetailView}
+          />
         </section>
       </main>
     </div>

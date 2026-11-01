@@ -6,7 +6,12 @@ import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import { createLargeGlowTexture } from "./GlowTexture";
 import { isUIHovered } from "../utils/SceneIntegration";
-import { createSpaceAtmosphere } from "./SpaceAtmosphere";
+import {
+  createSpaceAtmosphere,
+  SUN_DIRECTION,
+  SUN_POSITION,
+} from "./SpaceAtmosphere";
+import { createLensFlare } from "./LensFlare";
 import { CAMERA_PRESETS, DETAIL_PRESETS } from "../utils/CameraPresets";
 import type { SectionName, ViewMode } from "../utils/CameraPresets";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
@@ -46,6 +51,19 @@ function createGlowTexture() {
 
   return new THREE.CanvasTexture(canvas);
 }
+
+// Shortest-path angle interpolation (avoids spinning the long way round)
+function lerpAngle(from: number, to: number, t: number): number {
+  const diff = Math.atan2(Math.sin(to - from), Math.cos(to - from));
+  return from + diff * t;
+}
+
+// Frame-rate independent lerp factor
+function damp(rate: number, delta: number): number {
+  return 1 - Math.exp(-rate * delta);
+}
+
+type AvatarState = "walk" | "scan" | "notice" | "stare";
 
 function seededRand(seed: number): number {
   const x = Math.sin(seed + 1) * 43758.5453123;
@@ -94,7 +112,14 @@ const ParticleBackground = ({
 
     scene.add(new THREE.AmbientLight(0x2a0010, 0.35));
 
-    const red = new THREE.PointLight(0xfff48fb1, 22, 10);
+    // Key light coming from the distant energy source, so the planet and
+    // avatar are lit from the same direction the glow is seen in.
+    const sunLight = new THREE.DirectionalLight(0xff9ab8, 1.4);
+    sunLight.position.copy(SUN_DIRECTION).multiplyScalar(10);
+    scene.add(sunLight);
+    scene.add(sunLight.target);
+
+    const red = new THREE.PointLight(0xf48fb1, 12, 10);
     red.position.set(-2, 1, 2);
     scene.add(red);
 
@@ -119,6 +144,11 @@ const ParticleBackground = ({
       position: CAMERA_PRESETS.home.position.clone(),
       lookAt: CAMERA_PRESETS.home.lookAt.clone(),
     };
+
+    // Camera lives in the scene so the screen-space lens flare can ride on it
+    scene.add(camera);
+    const lensFlare = createLensFlare();
+    camera.add(lensFlare.group);
 
     camera.position.copy(cameraTarget.position);
     camera.lookAt(cameraTarget.lookAt);
@@ -172,13 +202,74 @@ const ParticleBackground = ({
     let avatarBaseY = 0;
     let avatarHoverT = 0.5; // smoothed 0->1, eases toward 1 while any menu item is hovered
 
-    let faceCameraDelay = 0;
+    // --- avatar behaviour: wander -> stop & look around -> spot the
+    // viewer -> stare at them -> wander again ---
+    const AVATAR_HOME = new THREE.Vector3(1.2, 0.3, 0.5);
+    const PLANET_CENTER = new THREE.Vector3(0.22, -0.2, 0);
+    const PLANET_RADIUS = 0.92; // matches PLANET_SCALE in PlanetSphere
+    const WANDER_RADIUS = 0.32;
+    const WALK_SPEED = 0.13; // world units / second
+
+    let avatarState: AvatarState = "walk";
+    let stateTime = 0;
+    let stateDuration = 0;
+    let avatarYaw = 0;
+    let scanBaseYaw = 0;
+    let walkWeight = 0;
+    let walkAction: THREE.AnimationAction | null = null;
+    const walkTarget = new THREE.Vector3();
+    const avatarPos = AVATAR_HOME.clone(); // ground position, before float
+    const toTarget = new THREE.Vector3();
     let lastCameraAngle = 0;
+
+    const pickWalkTarget = () => {
+      for (let i = 0; i < 12; i++) {
+        const a = Math.random() * Math.PI * 2;
+        const r = WANDER_RADIUS * (0.35 + Math.random() * 0.65);
+        walkTarget.set(
+          AVATAR_HOME.x + Math.cos(a) * r,
+          AVATAR_HOME.y,
+          AVATAR_HOME.z + Math.sin(a) * r,
+        );
+        // keep clear of the planet surface and far enough to be a real walk
+        if (
+          walkTarget.distanceTo(PLANET_CENTER) > PLANET_RADIUS + 0.28 &&
+          walkTarget.distanceTo(avatarPos) > 0.12
+        ) {
+          return;
+        }
+      }
+      walkTarget.copy(AVATAR_HOME);
+    };
+
+    const setAvatarState = (next: AvatarState) => {
+      avatarState = next;
+      stateTime = 0;
+      switch (next) {
+        case "walk":
+          pickWalkTarget();
+          stateDuration = 7;
+          break;
+        case "scan":
+          scanBaseYaw = avatarYaw;
+          stateDuration = 2.4 + Math.random() * 1.4;
+          break;
+        case "notice":
+          stateDuration = 0.45;
+          break;
+        case "stare":
+          stateDuration = 2.8 + Math.random() * 2.2;
+          break;
+      }
+    };
+    setAvatarState("walk");
 
     loader.load("/models/amongus_model.glb", (gltf) => {
       avatarGroup = new THREE.Group();
       avatarGroup.name = "avatarGroup";
-      avatarGroup.position.set(1.2, 0.3, 0.5);
+      avatarGroup.position.copy(AVATAR_HOME);
+      // yaw first, then lean/tilt relative to where it's facing
+      avatarGroup.rotation.order = "YXZ";
       avatarBaseY = avatarGroup.position.y;
 
       gltf.scene.scale.setScalar(0.00195);
@@ -212,10 +303,14 @@ const ParticleBackground = ({
           "[avatar] baked clips found:",
           gltf.animations.map((c) => c.name),
         );
+        // The baked clip is a walk cycle — keep it running and blend its
+        // weight so the avatar stands still when it stops to look around.
         const firstClipName = Object.keys(avatarClips)[0];
         if (firstClipName) {
-          avatarClips[firstClipName].setLoop(THREE.LoopRepeat, Infinity);
-          avatarClips[firstClipName].play();
+          walkAction = avatarClips[firstClipName];
+          walkAction.setLoop(THREE.LoopRepeat, Infinity);
+          walkAction.setEffectiveWeight(0);
+          walkAction.play();
         }
       } else {
         console.log("[avatar] no baked clips on this model — procedural only.");
@@ -328,6 +423,8 @@ const ParticleBackground = ({
     const correctedPosition = new THREE.Vector3();
     const forward = new THREE.Vector3();
     const rolledUp = new THREE.Vector3();
+    const flareRayDir = new THREE.Vector3();
+    const flareToPlanet = new THREE.Vector3();
     let animationId: number;
     let rotationSpeed = 0.001;
 
@@ -388,32 +485,122 @@ const ParticleBackground = ({
 
         const hoverLift = avatarHoverT * 0.08;
 
-        avatarGroup.position.y = avatarBaseY + floatY + hoverLift;
 
-        const dx = camera.position.x - avatarGroup.position.x;
-        const dz = camera.position.z - avatarGroup.position.z;
-
-        const targetRotation = Math.atan2(dx, dz);
-
+        // Viewer moved to another angle -> it lost track of them and has to
+        // look around again before finding them.
         const cameraAngle = Math.atan2(camera.position.x, camera.position.z);
-
-        if (Math.abs(cameraAngle - lastCameraAngle) > 0.01) {
-          faceCameraDelay = 0.06;
-          lastCameraAngle = cameraAngle;
+        const cameraJump = Math.abs(
+          Math.atan2(
+            Math.sin(cameraAngle - lastCameraAngle),
+            Math.cos(cameraAngle - lastCameraAngle),
+          ),
+        );
+        lastCameraAngle = cameraAngle;
+        if (cameraJump > 0.004 && avatarState === "stare") {
+          setAvatarState("scan");
         }
 
-        if (faceCameraDelay > 0) {
-          faceCameraDelay -= delta;
-        } else {
-          avatarGroup.rotation.y = THREE.MathUtils.lerp(
-            avatarGroup.rotation.y,
-            targetRotation,
-            0.27,
-          );
+        // Hovering a menu item always gets its attention
+        if (hovering && (avatarState === "walk" || avatarState === "scan")) {
+          setAvatarState("notice");
         }
 
-        // Keep the gentle sideways tilt
-        avatarGroup.rotation.z = Math.sin(time * 0.6 + 0.8) * 0.04;
+        stateTime += delta;
+
+        const yawToCamera = Math.atan2(
+          camera.position.x - avatarGroup.position.x,
+          camera.position.z - avatarGroup.position.z,
+        );
+
+        let targetWalkWeight = 0;
+        let lean = 0;
+        let tilt = Math.sin(time * 0.6 + 0.8) * 0.04;
+        let hop = 0;
+
+        switch (avatarState) {
+          case "walk": {
+            toTarget.subVectors(walkTarget, avatarPos);
+            toTarget.y = 0;
+            const dist = toTarget.length();
+            const desiredYaw = Math.atan2(toTarget.x, toTarget.z);
+            avatarYaw = lerpAngle(avatarYaw, desiredYaw, damp(5, delta));
+
+            // only step forward once roughly facing the way it's going
+            const facing = Math.cos(
+              Math.atan2(
+                Math.sin(desiredYaw - avatarYaw),
+                Math.cos(desiredYaw - avatarYaw),
+              ),
+            );
+            const step = Math.min(
+              dist,
+              WALK_SPEED * delta * Math.max(0, facing),
+            );
+            if (dist > 1e-4) avatarPos.addScaledVector(toTarget, step / dist);
+
+            targetWalkWeight = 1;
+            lean = 0.06; // slight forward lean while walking
+            tilt += Math.sin(time * 7.5) * 0.03; // waddle
+
+            if (dist < 0.02 || stateTime > stateDuration) {
+              setAvatarState(Math.random() < 0.7 ? "scan" : "walk");
+            }
+            break;
+          }
+          case "scan": {
+            // look left... right... left, easing between glances
+            const p = stateTime / stateDuration;
+            const sweep = Math.sin(p * Math.PI * 2.5) * 1.1;
+            avatarYaw = lerpAngle(
+              avatarYaw,
+              scanBaseYaw + sweep,
+              damp(4, delta),
+            );
+            tilt += Math.sin(p * Math.PI * 2.5) * 0.08; // head-tilt while searching
+            if (stateTime > stateDuration) {
+              setAvatarState(Math.random() < 0.65 ? "notice" : "walk");
+            }
+            break;
+          }
+          case "notice": {
+            // snap round to the viewer with a little startled hop
+            const p = Math.min(1, stateTime / stateDuration);
+            avatarYaw = lerpAngle(avatarYaw, yawToCamera, damp(14, delta));
+            hop = Math.sin(p * Math.PI) * 0.07;
+            lean = -0.08 * Math.sin(p * Math.PI); // rears back in surprise
+            if (stateTime > stateDuration) setAvatarState("stare");
+            break;
+          }
+          case "stare": {
+            // keep watching the viewer, leaning in curiously
+            avatarYaw = lerpAngle(avatarYaw, yawToCamera, damp(6, delta));
+            lean = 0.1 + Math.sin(time * 1.3) * 0.02;
+            tilt = Math.sin(time * 0.9) * 0.14;
+            if (!hovering && stateTime > stateDuration) setAvatarState("walk");
+            break;
+          }
+        }
+
+        walkWeight += (targetWalkWeight - walkWeight) * damp(6, delta);
+        if (walkAction) {
+          walkAction.setEffectiveWeight(walkWeight);
+          walkAction.timeScale = 0.6 + walkWeight * 0.5;
+        }
+
+        avatarGroup.position.x = avatarPos.x;
+        avatarGroup.position.z = avatarPos.z;
+        avatarGroup.position.y = avatarBaseY + floatY + hoverLift + hop;
+        avatarGroup.rotation.y = avatarYaw;
+        avatarGroup.rotation.x = THREE.MathUtils.lerp(
+          avatarGroup.rotation.x,
+          lean,
+          damp(6, delta),
+        );
+        avatarGroup.rotation.z = THREE.MathUtils.lerp(
+          avatarGroup.rotation.z,
+          tilt,
+          damp(6, delta),
+        );
 
         // Slightly grow when hovered
         const hoverScale = 1 + avatarHoverT * 0.06;
@@ -507,6 +694,23 @@ const ParticleBackground = ({
 
       prevViewModeRef.current = viewModeRef.current;
 
+      // --- lens flare: fades when the planet blocks the line of sight ---
+      flareRayDir.copy(SUN_POSITION).sub(camera.position).normalize();
+      flareToPlanet.subVectors(PLANET_CENTER, camera.position);
+      const along = flareToPlanet.dot(flareRayDir);
+      let sunVisibility = 1;
+      if (along > 0) {
+        const missDistance = flareToPlanet
+          .addScaledVector(flareRayDir, -along)
+          .length();
+        sunVisibility = THREE.MathUtils.smoothstep(
+          missDistance,
+          PLANET_RADIUS * 0.94,
+          PLANET_RADIUS * 1.12,
+        );
+      }
+      lensFlare.update(camera, SUN_POSITION, sunVisibility, delta);
+
       composer.render();
     };
 
@@ -539,6 +743,7 @@ const ParticleBackground = ({
       composer.dispose();
       renderer.dispose();
       spaceAtmosphere.dispose();
+      lensFlare.dispose();
 
       if (mount && renderer.domElement.parentElement === mount) {
         mount.removeChild(renderer.domElement);
